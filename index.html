@@ -3,500 +3,319 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>درب العراق | Darb Al-Iraq Navigation</title>
-
+<title>درب العراق | Darb Al-Iraq</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://tile.openstreetmap.org">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
+:root{--bg:#08111f;--panel:rgba(12,23,43,.96);--line:#35466b;--blue:#526ff5;--muted:#b5c3dc}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#08111f;color:#fff;font-family:Tajawal,Arial,sans-serif;overflow:hidden}
-#map{position:absolute;inset:0;direction:ltr}
-.maplibregl-ctrl-bottom-left{margin-bottom:140px}
-body.navigating .maplibregl-ctrl-bottom-left{display:none}
-
-.panel{position:absolute;z-index:5;background:rgba(12,23,43,.95);
-border:1px solid #35466b;border-radius:18px;box-shadow:0 8px 30px #0005}
-.top{top:12px;left:12px;right:12px;padding:12px}
-.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.brand h2{margin:0;font-size:23px;color:#8ba7ff}
-.brand small{color:#b5c3dc}
-.search{display:flex;gap:8px}
-input{min-width:0;flex:1;background:#101d34;color:white;border:1px solid #34486e;
-border-radius:12px;padding:13px;font:inherit;outline:none}
-button{border:0;border-radius:12px;padding:11px 14px;background:#526ff5;color:white;
-font:inherit;font-weight:700;cursor:pointer}
-button:active{transform:scale(.97)}
+html,body{height:100%;width:100%;margin:0}
+body{background:var(--bg);color:#fff;font-family:Tajawal,Arial,sans-serif;overflow:hidden}
+#map{position:fixed;inset:0;width:100%;height:100%;height:100dvh;background:#dce5e8;z-index:0;direction:ltr}
+.panel{position:absolute;z-index:500;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 30px #0005}
+.top{top:10px;left:10px;right:10px;padding:12px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.brand h2{margin:0;font-size:22px;color:#8ba7ff}
+.brand small{color:var(--muted);font-size:12px}
+.search{display:flex;gap:7px}
+input{min-width:0;flex:1;background:#101d34;color:white;border:1px solid #34486e;border-radius:12px;padding:12px;font:inherit;outline:none}
+button{border:0;border-radius:12px;padding:10px 13px;background:var(--blue);color:white;font:inherit;font-weight:700;cursor:pointer}
+button:active{transform:scale(.98)}
 button.ghost{background:#1c2c4d;border:1px solid #3a4d78}
 button.danger{background:#e04b5a}
-.results{display:none;margin-top:8px;max-height:260px;overflow:auto}
-.result{padding:10px 8px;border-bottom:1px solid #30405c;cursor:pointer;display:flex;gap:10px;align-items:center}
+.results{display:none;margin-top:8px;max-height:220px;overflow:auto}
+.result{padding:10px 7px;border-bottom:1px solid #30405c;cursor:pointer;font-size:14px;line-height:1.5}
 .result:hover{background:#243657}
-.result .rt{flex:1;min-width:0}
-.result .rn{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.result .ra{font-size:12px;color:#aebfe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.result .rd{font-size:12px;background:#243a66;border-radius:10px;padding:4px 8px;white-space:nowrap;color:#cfe0ff}
-#message{font-size:13px;color:#ffda88;margin-top:8px;min-height:0}
+#message{font-size:13px;color:#ffda88;margin-top:8px;line-height:1.5}
 #message:empty{display:none}
-
-.actions{position:absolute;z-index:5;right:12px;top:40%;display:flex;flex-direction:column;gap:10px}
-.actions button{width:48px;height:48px;padding:0;font-size:20px;box-shadow:0 4px 14px #0006}
-.actions .report{background:#ff7a3d}
-
-.bottom{bottom:12px;left:12px;right:12px;padding:14px}
-.status{color:#aebfe0;font-size:13px;margin-top:6px}
+.actions{position:absolute;z-index:500;right:10px;top:42%;display:flex;flex-direction:column;gap:8px}
+.actions button{width:46px;height:46px;padding:0;font-size:19px;box-shadow:0 4px 14px #0006}
+.bottom{bottom:10px;left:10px;right:10px;padding:13px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.btns{display:flex;flex-direction:column;gap:6px}
-.footer{font-size:12px;color:#c0cce2;text-align:center;margin-top:10px}
+.status{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.5;overflow-wrap:anywhere}
+.btns{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.footer{font-size:12px;color:#c0cce2;text-align:center;margin-top:9px;line-height:1.7}
 .footer a{color:#9bb1ff;text-decoration:none}
-
-/* navigation mode */
-.only-nav{display:none}
-body.navigating .only-nav{display:flex}
-body.navigating .not-nav{display:none !important}
-.navbanner{top:12px;left:12px;right:12px;padding:12px 16px;align-items:center;gap:14px;background:#1a6b3c;border-color:#2fa162}
-#navArrow{font-size:42px;line-height:1;min-width:48px;text-align:center}
-#navDist{font-size:26px;font-weight:800}
-#navText{font-size:15px;opacity:.95}
-.speedbox{position:absolute;z-index:5;left:12px;bottom:112px;flex-direction:column;gap:10px;align-items:center}
-.limit{width:56px;height:56px;border-radius:50%;background:#fff;color:#111;border:5px solid #e03a3a;
-display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
-.limit.none{opacity:.45;font-size:14px}
-.speed{width:66px;height:66px;border-radius:50%;background:rgba(12,23,43,.95);border:3px solid #6587ff;
-display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
-.speed b{font-size:24px}
-.speed small{font-size:10px;color:#aebfe0;margin-top:2px}
-.speed.over{border-color:#ff4d4d;background:#5a1620}
-.navbar{bottom:12px;left:12px;right:12px;padding:12px 14px;align-items:center;justify-content:space-between;gap:8px}
-.stat{text-align:center;flex:1}
-.stat b{display:block;font-size:20px}
-.stat span{font-size:11px;color:#aebfe0}
-.navbar button{padding:10px 14px}
-
-.alert{left:12px;right:12px;top:100px;padding:12px;display:none;align-items:center;gap:10px;background:#4a2b0f;border-color:#ff9a4d;z-index:8}
-.alert.show{display:flex}
-.alert .ai{font-size:30px}
-.alert .at{flex:1;font-weight:700}
-.alert button{padding:8px 10px;font-size:13px}
-
-.sheet{left:12px;right:12px;bottom:12px;padding:14px;display:none;z-index:9}
-.sheet.show{display:block}
-.sheet h3{margin:0 0 10px;font-size:17px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.grid button{background:#1c2c4d;border:1px solid #3a4d78;padding:14px 6px;font-size:14px;display:flex;flex-direction:column;gap:6px;align-items:center}
-.grid button span{font-size:28px}
-
-.hz{font-size:24px;line-height:1;filter:drop-shadow(0 2px 3px #000a);cursor:pointer}
-.me{width:24px;height:24px;border-radius:50%;background:#38e8ad;border:3px solid #fff;box-shadow:0 0 0 7px #38e8ad44;position:relative}
-.me::after{content:'';position:absolute;top:-13px;left:50%;transform:translateX(-50%);
-border:7px solid transparent;border-bottom:11px solid #fff;border-top:0}
-.pop{direction:rtl;font-family:Tajawal,Arial,sans-serif;color:#111;min-width:170px}
-.pop b{font-size:15px}
-.pop .pm{font-size:12px;color:#555;margin:4px 0 8px}
-.pop .pb{display:flex;gap:6px}
-.pop button{flex:1;padding:8px 6px;font-size:13px}
-.maplibregl-popup-content{padding:12px 14px}
-
+.leaflet-control-attribution{font-size:10px}
+.leaflet-popup-content{font-family:Tajawal,Arial,sans-serif;text-align:right;direction:rtl}
+.report-list{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.report-list button{background:#1c2c4d;border:1px solid #3a4d78;padding:10px 3px;font-size:13px}
+.report-list span{display:block;font-size:21px;margin-bottom:4px}
+.leaflet-container{font-family:Tajawal,Arial,sans-serif}
 @media(min-width:700px){
- .top,.navbanner{left:20px;right:auto;width:430px}
- .bottom,.navbar{left:20px;right:auto;width:430px}
- .alert{left:20px;right:auto;width:430px}
- .sheet{left:20px;right:auto;width:430px}
+ .top{left:20px;right:auto;width:430px}
+ .bottom{left:20px;right:auto;width:430px}
  .actions{right:22px}
+}
+@media(max-height:650px){
+ .top{padding:9px}.brand{margin-bottom:6px}.brand h2{font-size:19px}
+ .bottom{padding:9px}.footer{margin-top:5px}
+ .actions{top:44%}
 }
 </style>
 </head>
-
 <body>
-<div id="map"></div>
+<div id="map" aria-label="خريطة درب العراق"></div>
 
-<!-- لوحة البحث -->
-<div class="panel top not-nav">
+<div class="panel top">
   <div class="brand">
     <div>
       <h2>درب العراق <small>DARB AL-IRAQ</small></h2>
       <small>ملاحتك بلمسة عراقية 🇮🇶</small>
     </div>
-    <button onclick="toggle3D()" id="viewButton">3D</button>
+    <button class="ghost" id="homeBtn" type="button">بغداد</button>
   </div>
-
   <div class="search">
-    <input id="searchInput" placeholder="ابحث عن مكان أو شارع..." autocomplete="off">
-    <button onclick="searchPlaces()">بحث</button>
+    <input id="searchInput" placeholder="ابحث عن مكان أو شارع بأي دولة..." autocomplete="off">
+    <button id="searchBtn" type="button">بحث</button>
   </div>
   <div id="results" class="results"></div>
-  <div id="message"></div>
+  <div id="message" role="status"></div>
 </div>
 
-<!-- شريط التعليمات أثناء الملاحة -->
-<div class="panel navbanner only-nav">
-  <div id="navArrow">⬆</div>
-  <div>
-    <div id="navDist">--</div>
-    <div id="navText">--</div>
-  </div>
-</div>
-
-<!-- تنبيه سيطرة / كاميرا / حفرة قدامك -->
-<div class="panel alert" id="alertBox">
-  <div class="ai" id="alertIcon">🚧</div>
-  <div class="at" id="alertText"></div>
-  <button id="alertYes">موجود ✔</button>
-  <button id="alertNo" class="danger">مو موجود ✖</button>
-</div>
-
-<!-- أزرار جانبية -->
 <div class="actions">
-  <button onclick="locateUser()" title="موقعي">◎</button>
-  <button onclick="tiltMap()" title="منظور ثلاثي الأبعاد">3D</button>
-  <button class="not-nav" onclick="resetMap()" title="بغداد">⌂</button>
-  <button class="report" onclick="openReport()" title="تبليغ">🚨</button>
-  <button id="muteBtn" class="ghost" onclick="toggleMute()" title="الصوت">🔊</button>
+  <button id="locateBtn" title="موقعي" aria-label="موقعي">◎</button>
+  <button id="zoomInBtn" title="تكبير">＋</button>
+  <button id="zoomOutBtn" title="تصغير">−</button>
+  <button id="reportBtn" title="إضافة بلاغ">🚨</button>
 </div>
 
-<!-- السرعة وحد السرعة -->
-<div class="speedbox only-nav">
-  <div class="limit none" id="limitBox">--</div>
-  <div class="speed" id="speedBox"><b id="speedVal">0</b><small>كم/س</small></div>
-</div>
-
-<!-- لوحة الوجهة -->
-<div class="panel bottom not-nav">
+<div class="panel bottom">
   <div class="row">
     <div style="min-width:0;flex:1">
       <strong id="destinationTitle">درب العراق إلى وجهتك</strong>
-      <div class="status" id="routeInfo">ابحث عن مكان حتى تبدأ بتحديد وجهتك.</div>
+      <div class="status" id="routeInfo">ابحث عن مكان وحدده، ثم احسب المسار.</div>
     </div>
     <div class="btns">
-      <button id="mainBtn" onclick="mainAction()">عرض المسار</button>
-      <button class="ghost" onclick="simulateAction()" style="font-size:12px;padding:7px 10px">🎮 تجربة المسار</button>
+      <button id="routeBtn" type="button">عرض المسار</button>
+      <button id="clearBtn" class="ghost" type="button">مسح</button>
     </div>
   </div>
-  <div class="footer">
-    تمت البرمجة بأيادٍ عراقية 🇮🇶<br>
-    المطوّر: <a href="https://www.instagram.com/uv_d0/" target="_blank" rel="noopener">@uv_d0</a>
+  <div class="report-list" id="reportList" hidden>
+    <button data-type="checkpoint"><span>🚧</span>سيطرة</button>
+    <button data-type="traffic"><span>🚗</span>زحمة</button>
+    <button data-type="pothole"><span>🕳️</span>حفرة</button>
+    <button data-type="bump"><span>⚠️</span>مطب</button>
+    <button data-type="accident"><span>💥</span>حادث</button>
+    <button data-type="camera"><span>📷</span>كاميرا</button>
   </div>
+  <div class="footer">تمت البرمجة بأيادٍ عراقية 🇮🇶<br>المطوّر: <a href="https://www.instagram.com/uv_d0/" target="_blank" rel="noopener noreferrer">@uv_d0</a></div>
 </div>
 
-<!-- شريط الملاحة السفلي -->
-<div class="panel navbar only-nav">
-  <div class="stat"><b id="etaClock">--</b><span>الوصول</span></div>
-  <div class="stat"><b id="etaMin">--</b><span>دقيقة</span></div>
-  <div class="stat"><b id="etaKm">--</b><span>كم</span></div>
-  <button class="danger" onclick="stopNavigation(true)">إنهاء</button>
-</div>
-
-<!-- نافذة التبليغ -->
-<div class="panel sheet" id="reportSheet">
-  <h3>شنو تريد تبلّغ عنه هنا؟</h3>
-  <div class="grid" id="reportGrid"></div>
-  <button class="ghost" style="width:100%;margin-top:10px" onclick="closeReport()">إلغاء</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+(() => {
+'use strict';
 const $ = id => document.getElementById(id);
-const message = text => $('message').textContent = text;
+const say = text => { $('message').textContent = text || ''; };
+const BAGHDAD = [33.3152, 44.3661];
+let map, userMarker = null, destinationMarker = null, routeLayer = null;
+let userPosition = null, destination = null, routeBusy = false;
+let reportMarkers = [];
 
-/* ---------- إصلاح الكتابة المعكوسة للعربي على الخريطة ---------- */
-try{
-  const p = maplibregl.setRTLTextPlugin(
-    'https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
-    true
-  );
-  if(p && p.catch) p.catch(e => console.log('RTL plugin failed:', e));
-}catch(e){ console.log('RTL plugin error:', e); }
+const types = {
+ checkpoint:{icon:'🚧',label:'سيطرة'},
+ traffic:{icon:'🚗',label:'ازدحام'},
+ pothole:{icon:'🕳️',label:'حفرة'},
+ bump:{icon:'⚠️',label:'مطب'},
+ accident:{icon:'💥',label:'حادث'},
+ camera:{icon:'📷',label:'كاميرا'}
+};
 
-const map = new maplibregl.Map({
-  container:'map',
-  style:'https://tiles.openfreemap.org/styles/liberty',
-  center:[44.3661,33.3152],
-  zoom:12,
-  pitch:55,
-  bearing:-15,
-  antialias:true
-});
-map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-left');
-
-/* ---------- الحالة ---------- */
-let userPosition = null;
-let destination = null;
-let destinationMarker = null;
-let userMarker = null;
-let is3D = true;
-let routeReady = false;
-let R = null;               // بيانات المسار الحالي
-let navigating = false;
-let watchId = null;
-let simTimer = null;
-let wakeLock = null;
-let muted = false;
-let ann = {};               // التعليمات الصوتية اللي انقالت
-let alerted = new Set();    // تنبيهات الأخطار اللي انقالت بهاي الرحلة
-let offCount = 0;
-let rerouting = false;
-let lastReroute = 0;
-let lastFix = null;
-let curLimit = null;
-let lastLimitFetch = 0;
-let lastOverWarn = 0;
-let currentAlertReport = null;
-let alertTimer = null;
-
-/* ---------- أدوات رياضية ---------- */
-const toR = Math.PI/180;
-function hav(a,b){
-  const dLat=(b[1]-a[1])*toR, dLng=(b[0]-a[0])*toR;
-  const s=Math.sin(dLat/2)**2+Math.cos(a[1]*toR)*Math.cos(b[1]*toR)*Math.sin(dLng/2)**2;
-  return 2*6371000*Math.asin(Math.sqrt(s));
-}
-function bearingBetween(a,b){
-  const y=Math.sin((b[0]-a[0])*toR)*Math.cos(b[1]*toR);
-  const x=Math.cos(a[1]*toR)*Math.sin(b[1]*toR)-Math.sin(a[1]*toR)*Math.cos(b[1]*toR)*Math.cos((b[0]-a[0])*toR);
-  return (Math.atan2(y,x)/toR+360)%360;
-}
-function projectOnRoute(p){
-  if(!R) return null;
-  const k=Math.cos(p[1]*toR), Rm=6371000;
-  const px=p[0]*toR*k*Rm, py=p[1]*toR*Rm;
-  let best={dist:Infinity,along:0};
-  const c=R.coords;
-  for(let i=0;i<c.length-1;i++){
-    const ax=c[i][0]*toR*k*Rm, ay=c[i][1]*toR*Rm;
-    const bx=c[i+1][0]*toR*k*Rm, by=c[i+1][1]*toR*Rm;
-    const dx=bx-ax, dy=by-ay, l2=dx*dx+dy*dy;
-    let t=l2?((px-ax)*dx+(py-ay)*dy)/l2:0;
-    t=Math.max(0,Math.min(1,t));
-    const d=Math.hypot(px-(ax+t*dx),py-(ay+t*dy));
-    if(d<best.dist) best={dist:d,along:R.cum[i]+t*(R.cum[i+1]-R.cum[i])};
+function initMap(){
+  if(typeof L === 'undefined'){
+    say('تعذّر تحميل مكتبة الخريطة. تأكد من الإنترنت ثم حدّث الصفحة.');
+    return;
   }
-  return best;
-}
-function pointAtAlong(d){
-  const c=R.coords, cum=R.cum;
-  if(d<=0) return c[0];
-  if(d>=cum[cum.length-1]) return c[c.length-1];
-  let i=0; while(i<cum.length-2 && cum[i+1]<d) i++;
-  const seg=cum[i+1]-cum[i]||1, t=(d-cum[i])/seg;
-  return [c[i][0]+(c[i+1][0]-c[i][0])*t, c[i][1]+(c[i+1][1]-c[i][1])*t];
-}
-function fmtDist(m){
-  return m<1000 ? (Math.max(10,Math.round(m/10)*10))+' م' : (m/1000).toFixed(1)+' كم';
-}
-function sayDist(m){
-  if(m>=950) return 'كيلومتر واحد';
-  return (Math.max(50,Math.round(m/50)*50))+' متر';
-}
-
-/* ---------- الصوت ---------- */
-let arVoice = null;
-function pickVoice(){
-  if(!('speechSynthesis' in window)) return;
-  const v = speechSynthesis.getVoices();
-  arVoice = v.find(x=>/^ar/i.test(x.lang)) || null;
-}
-if('speechSynthesis' in window){
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-}
-function speak(text){
-  if(muted || !('speechSynthesis' in window)) return;
   try{
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ar-SA';
-    if(arVoice) u.voice = arVoice;
-    u.rate = 1;
-    speechSynthesis.speak(u);
-  }catch(e){}
-}
-function toggleMute(){
-  muted = !muted;
-  $('muteBtn').textContent = muted ? '🔇' : '🔊';
-  if(muted && 'speechSynthesis' in window) speechSynthesis.cancel();
-}
-
-/* ---------- الخريطة: تحميل + مباني 3D ---------- */
-map.on('load',()=>{
-  message('الخريطة جاهزة. ابحث عن وجهتك.');
-  add3DBuildings();
-  renderReports();
-  loadCamerasInView();
-});
-map.on('moveend',()=>{
-  clearTimeout(map._camT);
-  map._camT=setTimeout(loadCamerasInView,1200);
-});
-
-function add3DBuildings(){
-  try{
-    const style = map.getStyle();
-    if(!style.sources || !style.sources.openmaptiles) return;
-    if(map.getLayer('darb-3d-buildings')) return;
-    let labelLayerId;
-    for(const layer of (style.layers||[])){
-      if(layer.type==='symbol' && layer.layout && layer.layout['text-field']){ labelLayerId=layer.id; break; }
-    }
-    map.addLayer({
-      id:'darb-3d-buildings',source:'openmaptiles','source-layer':'building',
-      type:'fill-extrusion',minzoom:14,
-      filter:['!=',['get','hide_3d'],'true'],
-      paint:{
-        'fill-extrusion-color':'#647ba5',
-        'fill-extrusion-height':['interpolate',['linear'],['zoom'],14,0,15,['coalesce',['get','render_height'],['get','height'],12]],
-        'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
-        'fill-extrusion-opacity':0.82
-      }
-    },labelLayerId);
-  }catch(e){ console.log('3D buildings unavailable:',e); }
+    map = L.map('map', {zoomControl:false, preferCanvas:true}).setView(BAGHDAD, 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+      crossOrigin:true
+    }).addTo(map);
+    map.on('tileerror', () => {
+      say('بعض أجزاء الخريطة ما تحمّلت. تحقق من الاتصال أو جرّب تحديث الصفحة.');
+    });
+    map.whenReady(() => {
+      setTimeout(() => map.invalidateSize(true), 250);
+      say('الخريطة جاهزة. ابحث عن وجهتك.');
+    });
+    window.addEventListener('resize', () => map.invalidateSize(true));
+    setTimeout(() => { if(map) map.invalidateSize(true); }, 1000);
+  }catch(err){
+    console.error(err);
+    say('تعذّر تشغيل الخريطة في هذا المتصفح. جرّب Chrome وتأكد من تفعيل تسريع الرسوميات.');
+  }
 }
 
-function toggle3D(){
-  is3D=!is3D;
-  map.easeTo({pitch:is3D?55:0,bearing:is3D?-15:0,duration:800});
-  $('viewButton').textContent=is3D?'3D':'2D';
+function distanceMeters(a,b){
+  return map.distance(L.latLng(a[0],a[1]), L.latLng(b[0],b[1]));
 }
-function tiltMap(){ is3D=true; map.easeTo({pitch:60,duration:800}); $('viewButton').textContent='3D'; }
-function resetMap(){ map.flyTo({center:[44.3661,33.3152],zoom:12,pitch:55,bearing:-15}); }
-
-/* ---------- علامة موقع المستخدم ---------- */
-function setUserMarker(lnglat,heading){
+function setUser(latlng){
+  userPosition = [latlng.lat, latlng.lng];
   if(!userMarker){
-    const el=document.createElement('div'); el.className='me';
-    userMarker=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map'})
-      .setLngLat(lnglat).addTo(map);
-  }else userMarker.setLngLat(lnglat);
-  if(heading!=null && !isNaN(heading)) userMarker.setRotation(heading);
+    userMarker = L.circleMarker(latlng,{radius:8,color:'#fff',weight:3,fillColor:'#22d3a6',fillOpacity:1})
+      .addTo(map).bindPopup('موقعك الحالي');
+  }else userMarker.setLatLng(latlng);
+}
+function locateUser(){
+  if(!navigator.geolocation){
+    say('المتصفح لا يدعم تحديد الموقع.');
+    return;
+  }
+  say('جاري تحديد موقعك...');
+  navigator.geolocation.getCurrentPosition(pos => {
+    const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
+    setUser(ll);
+    map.flyTo(ll,16);
+    say('تم تحديد موقعك.');
+  }, err => {
+    console.warn(err);
+    say(location.protocol === 'file:' ?
+      'الموقع الجغرافي قد لا يعمل من ملف مباشر. افتح الموقع عبر HTTPS أو localhost.' :
+      'تعذّر تحديد الموقع. اسمح للمتصفح باستخدام الموقع وتأكد من تشغيل GPS.');
+  }, {enableHighAccuracy:true, timeout:15000, maximumAge:5000});
 }
 
-/* ---------- البحث (نتائج قريبة منك أولاً) ---------- */
-async function nominatim(q,extra){
-  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=10&accept-language=ar&countrycodes=iq&addressdetails=0&q='
-    +encodeURIComponent(q)+(extra||'');
-  const r=await fetch(url,{headers:{'Accept':'application/json'}});
-  if(!r.ok) throw new Error('search failed');
-  return r.json();
-}
 async function searchPlaces(){
-  const q=$('searchInput').value.trim();
-  if(!q){message('اكتب اسم المكان أولاً.');return;}
-  const box=$('results');
-  box.style.display='block';
-  box.innerHTML='<div class="result">جاري البحث...</div>';
-  message('');
-  const c = userPosition || [map.getCenter().lng,map.getCenter().lat];
-  const d=0.5;
-  const vb='&viewbox='+[c[0]-d,c[1]+d,c[0]+d,c[1]-d].join(',');
+  const q = $('searchInput').value.trim();
+  if(!q){ say('اكتب اسم المكان أولاً.'); return; }
+  $('results').style.display = 'block';
+  $('results').innerHTML = '<div class="result">جاري البحث...</div>';
+  say('');
   try{
-    let list=await nominatim(q,vb+'&bounded=1');
-    if(list.length<4){
-      const more=await nominatim(q,vb);
-      const seen=new Set(list.map(p=>p.place_id));
-      more.forEach(p=>{ if(!seen.has(p.place_id)) list.push(p); });
-    }
-    list.forEach(p=>p._d=hav(c,[Number(p.lon),Number(p.lat)]));
-    list.sort((a,b)=>a._d-b._d);
-    box.innerHTML='';
-    if(!list.length){
-      box.innerHTML='<div class="result">ما لقينا نتائج. جرّب اسم أو عنوان أوضح.</div>';
+    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=1&accept-language=ar,en&q=' + encodeURIComponent(q);
+    const response = await fetch(url, {headers:{'Accept':'application/json'}});
+    if(!response.ok) throw new Error('Search HTTP ' + response.status);
+    const places = await response.json();
+    const box = $('results');
+    box.innerHTML = '';
+    if(!places.length){
+      box.innerHTML = '<div class="result">ما لقينا نتيجة. جرّب كتابة الاسم بالعربي أو الإنكليزي.</div>';
       return;
     }
-    list.slice(0,10).forEach(place=>{
-      const parts=place.display_name.split('،').length>1?place.display_name.split('،'):place.display_name.split(',');
-      const name=(place.name||parts[0]||'').trim();
-      const addr=parts.slice(1,4).join('،').trim();
-      const item=document.createElement('div'); item.className='result';
-      const rt=document.createElement('div'); rt.className='rt';
-      const rn=document.createElement('div'); rn.className='rn'; rn.textContent=name;
-      const ra=document.createElement('div'); ra.className='ra'; ra.textContent=addr;
-      rt.appendChild(rn); rt.appendChild(ra);
-      const rd=document.createElement('div'); rd.className='rd'; rd.textContent=fmtDist(place._d);
-      item.appendChild(rt); item.appendChild(rd);
-      item.onclick=()=>selectPlace(place,name);
+    places.forEach(place => {
+      const item = document.createElement('div');
+      item.className = 'result';
+      item.textContent = place.display_name;
+      item.addEventListener('click', () => selectPlace(place));
       box.appendChild(item);
     });
-  }catch(e){
-    box.innerHTML='<div class="result">تعذر البحث. تأكد من الإنترنت وحاول مرة ثانية.</div>';
+  }catch(err){
+    console.error(err);
+    $('results').innerHTML = '<div class="result">تعذّر البحث. تحقق من الإنترنت وحاول بعد قليل.</div>';
   }
 }
-$('searchInput').addEventListener('keydown',e=>{ if(e.key==='Enter') searchPlaces(); });
-
-function clearRoute(){
-  routeReady=false; R=null;
-  if(map.getLayer('darb-route')) map.removeLayer('darb-route');
-  if(map.getLayer('darb-route-casing')) map.removeLayer('darb-route-casing');
-  if(map.getSource('darb-route')) map.removeSource('darb-route');
-  $('mainBtn').textContent='عرض المسار';
-}
-function selectPlace(place,name){
-  clearRoute();
-  destination=[Number(place.lon),Number(place.lat)];
-  $('destinationTitle').textContent=name||'الوجهة المحددة';
-  $('routeInfo').textContent=place.display_name;
-  $('results').style.display='none';
-  if(destinationMarker) destinationMarker.remove();
-  destinationMarker=new maplibregl.Marker({color:'#ff5964'})
-    .setLngLat(destination)
-    .setPopup(new maplibregl.Popup().setText(place.display_name))
-    .addTo(map);
-  map.flyTo({center:destination,zoom:15,pitch:55,duration:1000});
-  message('تم تحديد الوجهة. اضغط «عرض المسار».');
+function selectPlace(place){
+  const lat = Number(place.lat), lon = Number(place.lon);
+  if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+  destination = [lat,lon];
+  $('destinationTitle').textContent = (place.name || place.display_name.split(',')[0] || 'الوجهة المحددة');
+  $('routeInfo').textContent = place.display_name;
+  $('results').style.display = 'none';
+  if(destinationMarker) map.removeLayer(destinationMarker);
+  destinationMarker = L.marker(destination).addTo(map).bindPopup(place.display_name).openPopup();
+  map.flyTo(destination,15);
+  say('تم تحديد الوجهة. اضغط «عرض المسار».');
+  clearRoute(false);
 }
 
-/* ---------- تحديد الموقع ---------- */
-function getPosition(){
-  return new Promise((res,rej)=>{
-    if(!navigator.geolocation) return rej(new Error('unsupported'));
-    navigator.geolocation.getCurrentPosition(
-      p=>res([p.coords.longitude,p.coords.latitude]),
-      e=>rej(e),
-      {enableHighAccuracy:true,timeout:15000}
-    );
-  });
-}
-async function locateUser(){
-  message('جاري تحديد موقعك...');
+async function showRoute(){
+  if(routeBusy) return;
+  if(!destination){ say('ابحث عن وجهتك واختارها أولاً.'); return; }
+  if(!userPosition){
+    if(!navigator.geolocation){
+      say('المتصفح لا يدعم تحديد الموقع.'); return;
+    }
+    say('نحتاج موقعك حتى نحسب المسار...');
+    try{
+      const p = await new Promise((resolve,reject) => navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000}));
+      setUser(L.latLng(p.coords.latitude,p.coords.longitude));
+    }catch(e){
+      say('تعذّر تحديد موقعك. اسمح بإذن الموقع، أو اضغط «موقعي» أولاً.');
+      return;
+    }
+  }
+  routeBusy = true;
+  $('routeBtn').disabled = true;
+  say('جاري حساب المسار...');
   try{
-    userPosition=await getPosition();
-    setUserMarker(userPosition);
-    map.flyTo({center:userPosition,zoom:16,pitch:55});
-    message('تم تحديد موقعك.');
-  }catch(e){
-    message('تعذر تحديد الموقع. اسمح للمتصفح بالوصول للموقع (لازم الموقع يكون HTTPS).');
+    const start = [userPosition[1],userPosition[0]];
+    const end = [destination[1],destination[0]];
+    const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson`;
+    const response = await fetch(url);
+    if(!response.ok) throw new Error('Route HTTP ' + response.status);
+    const data = await response.json();
+    if(data.code !== 'Ok' || !data.routes || !data.routes.length) throw new Error('No route');
+    const route = data.routes[0];
+    clearRoute(false);
+    const latlngs = route.geometry.coordinates.map(c => [c[1],c[0]]);
+    const casing = L.polyline(latlngs,{color:'#142b68',weight:9,opacity:.85});
+    const topLine = L.polyline(latlngs,{color:'#587cff',weight:5,opacity:1});
+    routeLayer = L.layerGroup([casing, topLine]).addTo(map);
+    const km = route.distance / 1000;
+    const mins = Math.max(1,Math.round(route.duration/60));
+    $('routeInfo').textContent = `المسافة ${km.toFixed(1)} كم · الوقت التقريبي ${mins} دقيقة`;
+    $('routeBtn').textContent = 'تحديث المسار';
+    map.fitBounds(L.latLngBounds(latlngs),{paddingTopLeft:[30,170],paddingBottomRight:[30,210],maxZoom:16});
+    say('تم رسم المسار. الوقت والمسافة تقديريّان.');
+  }catch(err){
+    console.error(err);
+    say('تعذّر حساب المسار حالياً. تحقق من الإنترنت أو جرّب وجهة أقرب.');
+  }finally{
+    routeBusy = false;
+    $('routeBtn').disabled = false;
   }
 }
+function clearRoute(showMessage=true){
+  if(routeLayer && map){ map.removeLayer(routeLayer); routeLayer = null; }
+  if(showMessage){
+    $('routeInfo').textContent = 'تم مسح المسار. ابحث عن وجهة جديدة.';
+    say('');
+  }
+}
+function toggleReports(){
+  const list = $('reportList');
+  list.hidden = !list.hidden;
+  if(!list.hidden) say('اختار نوع البلاغ، وسيُضاف عند موقعك الحالي أو مركز الخريطة.');
+}
+function addReport(type){
+  const t = types[type];
+  if(!t || !map) return;
+  const ll = userPosition ? L.latLng(userPosition[0],userPosition[1]) : map.getCenter();
+  const marker = L.marker(ll).addTo(map).bindPopup(`${t.icon} ${t.label}<br>بلاغ محلي على هذا الجهاز`);
+  reportMarkers.push(marker);
+  $('reportList').hidden = true;
+  say(`تم وضع علامة بلاغ «${t.label}» على الخريطة بهذا الجهاز.`);
+}
 
-/* ---------- حساب المسار ---------- */
-async function buildRoute(opts){
-  opts=opts||{};
-  const origin=opts.origin||userPosition;
-  if(!origin||!destination) return false;
-  if(!opts.silent) message('جاري حساب المسار...');
-  try{
-    const coords=origin.join(',')+';'+destination.join(',');
-    const url='https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=geojson&steps=true';
-    const r=await fetch(url);
-    if(!r.ok) throw new Error('route failed');
-    const data=await r.json();
-    if(data.code!=='Ok'||!data.routes.length) throw new Error('no route');
-    const route=data.routes[0];
-    const c=route.geometry.coordinates;
-    const cum=[0];
-    for(let i=1;i<c.length;i++) cum.push(cum[i-1]+hav(c[i-1],c[i]));
-    const steps=route.legs[0].steps;
-    const stepAt=[0];
-    for(let i=1;i<steps.length;i++) stepAt.push(stepAt[i-1]+steps[i-1].distance);
-    R={
-      coords:c,cum,steps,stepAt,
-      distance:route.distance,duration:route.duration,
-      scale:route.distance/(cum[cum.length-1]||1)
-    };
-    ann={}; alerted=new Set(); offCount=0;
-
-    if(map.getLayer('darb-route')) map.removeLayer('darb-route');
-    if(map.getLayer('darb-route-casing')) map.removeLayer('darb-route-casing');
-    if(map.getSource('darb-route')) map.removeSource('darb-route');
-    map.addSource('darb-route',{type:'geojson',data:{type:'Feature',properties:{},geometry:route.geometry}});
-    map.addLayer({id:'darb-route-casing',type:'line',source:'darb-route',
-      layout:{'line-join':'round','line-cap':'round'},
-      paint:{
+$('searchBtn').addEventListener('click',searchPlaces);
+$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter') searchPlaces();});
+$('locateBtn').addEventListener('click',locateUser);
+$('zoomInBtn').addEventListener('click',()=>map && map.zoomIn());
+$('zoomOutBtn').addEventListener('click',()=>map && map.zoomOut());
+$('homeBtn').addEventListener('click',()=>{if(map) map.flyTo(BAGHDAD,12);});
+$('routeBtn').addEventListener('click',showRoute);
+$('clearBtn').addEventListener('click',()=>{
+  clearRoute(false);
+  destination = null;
+  if(destinationMarker){map.removeLayer(destinationMarker);destinationMarker=null;}
+  $('destinationTitle').textContent = 'درب العراق إلى وجهتك';
+  $('routeInfo').textContent = 'ابحث عن مكان وحدده، ثم احسب المسار.';
+  $('routeBtn').textContent = 'عرض المسار';
+  say('تم مسح الوجهة والمسار.');
+});
+$('reportBtn').addEventListener('click',toggleReports);
+$('reportList').querySelectorAll('button[data-type]').forEach(btn=>{
+  btn.addEventListener('click',()=>addReport(btn.dataset.type));
+});
+window.addEventListener('online',()=>say('عاد الاتصال بالإنترنت. حدّث الصفحة إذا بقيت الخريطة فارغة.'));
+window.addEventListener('offline',()=>say('الاتصال بالإنترنت منقطع. الخريطة والبحث يحتاجان إلى الإنترنت.'));
+initMap();
+})();
+</script>
+</body>
+</html>
