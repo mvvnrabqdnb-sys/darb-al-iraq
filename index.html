@@ -502,4 +502,432 @@ async function buildRoute(opts){
     const coords=origin.join(',')+';'+destination.join(',');
     const url='https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=geojson&steps=true';
     const r=await fetch(url);
-    if(!r.ok)
+    if(!r.ok) throw new Error('route failed');
+    const data=await r.json();
+    if(data.code!=='Ok'||!data.routes.length) throw new Error('no route');
+    const route=data.routes[0];
+    const c=route.geometry.coordinates;
+    const cum=[0];
+    for(let i=1;i<c.length;i++) cum.push(cum[i-1]+hav(c[i-1],c[i]));
+    const steps=route.legs[0].steps;
+    const stepAt=[0];
+    for(let i=1;i<steps.length;i++) stepAt.push(stepAt[i-1]+steps[i-1].distance);
+    R={
+      coords:c,cum,steps,stepAt,
+      distance:route.distance,duration:route.duration,
+      scale:route.distance/(cum[cum.length-1]||1)
+    };
+    ann={}; alerted=new Set(); offCount=0;
+
+    if(map.getLayer('darb-route')) map.removeLayer('darb-route');
+    if(map.getLayer('darb-route-casing')) map.removeLayer('darb-route-casing');
+    if(map.getSource('darb-route')) map.removeSource('darb-route');
+    map.addSource('darb-route',{type:'geojson',data:{type:'Feature',properties:{},geometry:route.geometry}});
+    map.addLayer({id:'darb-route-casing',type:'line',source:'darb-route',
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':'#0b1f5c','line-width':10,'line-opacity':0.9}});
+    map.addLayer({id:'darb-route',type:'line',source:'darb-route',
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':'#6587ff','line-width':6,'line-opacity':0.98}});
+
+    routeReady=true;
+    $('mainBtn').textContent='ابدأ القيادة';
+    $('routeInfo').textContent='المسافة '+(route.distance/1000).toFixed(1)+' كم · الوقت '+Math.max(1,Math.round(route.duration/60))+' دقيقة تقريباً';
+    if(!opts.silent){
+      message('تم رسم المسار. اضغط «ابدأ القيادة».');
+      const b=new maplibregl.LngLatBounds(origin,origin);
+      c.forEach(p=>b.extend(p));
+      map.fitBounds(b,{padding:{top:140,bottom:180,left:50,right:50},pitch:0,bearing:0,duration:1000});
+    }
+    // جلب كاميرات السرعة على طول المسار
+    const bb=bboxOf(c);
+    loadCameras(bb);
+    return true;
+  }catch(e){
+    if(!opts.silent) message('تعذر حساب المسار حالياً. تحقق من الإنترنت وحاول مرة ثانية.');
+    return false;
+  }
+}
+function bboxOf(c){
+  let w=180,s=90,e=-180,n=-90;
+  c.forEach(p=>{ if(p[0]<w)w=p[0]; if(p[0]>e)e=p[0]; if(p[1]<s)s=p[1]; if(p[1]>n)n=p[1]; });
+  return {w:w-0.005,s:s-0.005,e:e+0.005,n:n+0.005};
+}
+
+async function mainAction(){
+  if(!destination){message('ابحث عن وجهتك واختارها أولاً.');return;}
+  if(!routeReady){
+    if(!userPosition){
+      message('جاري تحديد موقعك...');
+      try{ userPosition=await getPosition(); setUserMarker(userPosition); }
+      catch(e){ message('تعذر تحديد الموقع. اسمح للمتصفح بالوصول للموقع، أو جرّب «تجربة المسار».'); return; }
+    }
+    await buildRoute();
+  }else{
+    startNavigation(false);
+  }
+}
+async function simulateAction(){
+  if(!destination){message('ابحث عن وجهتك واختارها أولاً.');return;}
+  if(!userPosition){
+    userPosition=[map.getCenter().lng,map.getCenter().lat];
+    setUserMarker(userPosition);
+  }
+  if(!routeReady){ const ok=await buildRoute({silent:true}); if(!ok){message('تعذر حساب المسار.');return;} }
+  startNavigation(true);
+}
+
+/* ---------- بدء/إنهاء الملاحة ---------- */
+async function startNavigation(sim){
+  if(!R) return;
+  navigating=true;
+  document.body.classList.add('navigating');
+  $('results').style.display='none';
+  ann={}; alerted=new Set(); offCount=0; lastFix=null; curLimit=null;
+  setLimit(null);
+  try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+  speak('بدأت الملاحة. الطريق '+Math.max(1,Math.round(R.duration/60))+' دقيقة تقريباً');
+  if('speechSynthesis' in window){
+    setTimeout(()=>{ if(!arVoice) pickVoice(); if(!arVoice) toast('ما لقيت صوت عربي بجهازك. ثبّت صوت عربي من إعدادات «تحويل النص إلى كلام».'); },1500);
+  }
+  map.easeTo({center:userPosition,zoom:17,pitch:60,duration:900});
+  if(sim) startSimulation(); else startWatch();
+}
+function stopNavigation(speakIt){
+  navigating=false;
+  document.body.classList.remove('navigating');
+  if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  if(simTimer){ clearInterval(simTimer); simTimer=null; }
+  try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){}
+  hideAlert();
+  if(speakIt) speak('تم إنهاء الملاحة');
+  map.easeTo({pitch:55,bearing:-15,zoom:14,duration:800});
+  routeReady=true; $('mainBtn').textContent='ابدأ القيادة';
+}
+function startWatch(){
+  if(!navigator.geolocation){ message('متصفحك لا يدعم تحديد الموقع.'); return; }
+  watchId=navigator.geolocation.watchPosition(p=>{
+    onPosition({
+      lng:p.coords.longitude,lat:p.coords.latitude,
+      speed:p.coords.speed,heading:p.coords.heading
+    });
+  },()=>{ toast('إشارة GPS ضعيفة...'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
+}
+function startSimulation(){
+  let d=0;
+  const total=R.cum[R.cum.length-1];
+  const mps=50/3.6;
+  simTimer=setInterval(()=>{
+    d+=mps*1.2;
+    if(d>=total){ clearInterval(simTimer); simTimer=null; }
+    const p=pointAtAlong(d), p2=pointAtAlong(d+15);
+    onPosition({lng:p[0],lat:p[1],speed:mps,heading:bearingBetween(p,p2)});
+  },1000);
+}
+
+/* ---------- نص التعليمات بالعربي ---------- */
+const ORD=['','الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن'];
+function maneuverInfo(step){
+  const m=step.maneuver||{}, t=m.type, mod=m.modifier||'';
+  const name=step.name?(' إلى '+step.name):'';
+  const dirAr={'left':'اليسار','right':'اليمين','slight left':'اليسار','slight right':'اليمين','sharp left':'اليسار','sharp right':'اليمين'};
+  if(t==='arrive') return {arrow:'🏁',text:'وصلت إلى وجهتك'+(mod==='left'?' (على يسارك)':mod==='right'?' (على يمينك)':'')};
+  if(t==='depart') return {arrow:'⬆',text:'ابدأ التحرك'+name};
+  if(t==='roundabout'||t==='rotary'||t==='roundabout turn'){
+    const ex=m.exit?(' وخذ المخرج '+(ORD[m.exit]||m.exit)):'';
+    return {arrow:'⟳',text:'ادخل الدوار'+ex+name};
+  }
+  if(t==='fork'){
+    return {arrow:mod.includes('left')?'↖':'↗',text:'عند التفرّع ابقَ على '+(dirAr[mod]||'الطريق الرئيسي')};
+  }
+  if(t==='merge') return {arrow:'⬆',text:'اندمج مع الطريق'+name};
+  switch(mod){
+    case 'left':return {arrow:'⬅',text:'انعطف يسار'+name};
+    case 'right':return {arrow:'➡',text:'انعطف يمين'+name};
+    case 'slight left':return {arrow:'↖',text:'انعطف قليلاً إلى اليسار'+name};
+    case 'slight right':return {arrow:'↗',text:'انعطف قليلاً إلى اليمين'+name};
+    case 'sharp left':return {arrow:'↰',text:'انعطف بشدة إلى اليسار'+name};
+    case 'sharp right':return {arrow:'↱',text:'انعطف بشدة إلى اليمين'+name};
+    case 'uturn':return {arrow:'↩',text:'استدر للعودة'};
+    default:return {arrow:'⬆',text:'استمر للأمام'+name};
+  }
+}
+
+/* ---------- المعالجة الأساسية لكل تحديث موقع ---------- */
+function onPosition(p){
+  const pos=[p.lng,p.lat];
+  userPosition=pos;
+
+  // السرعة
+  let sp=p.speed;
+  const now=Date.now();
+  if((sp==null||isNaN(sp)) && lastFix){
+    const dt=(now-lastFix.t)/1000;
+    if(dt>0) sp=hav(lastFix.pos,pos)/dt;
+  }
+  // الاتجاه
+  let hd=p.heading;
+  if((hd==null||isNaN(hd)) && lastFix && hav(lastFix.pos,pos)>3) hd=bearingBetween(lastFix.pos,pos);
+  if(hd==null||isNaN(hd)) hd=lastFix?lastFix.hd:0;
+  lastFix={pos,t:now,hd};
+  const kmh=Math.max(0,Math.round((sp||0)*3.6));
+
+  setUserMarker(pos,hd);
+  if(!navigating||!R) return;
+
+  $('speedVal').textContent=kmh;
+  const over=curLimit&&kmh>curLimit+5;
+  $('speedBox').classList.toggle('over',!!over);
+  if(over && now-lastOverWarn>30000){ lastOverWarn=now; speak('انتبه، تجاوزت السرعة المحددة'); }
+
+  map.easeTo({center:pos,bearing:hd,pitch:60,zoom:17,offset:[0,160],duration:900,essential:true});
+
+  const pr=projectOnRoute(pos);
+  const along=pr.along*R.scale;
+  const remaining=Math.max(0,R.distance-along);
+  const remTime=R.duration*(remaining/R.distance);
+
+  // خارج المسار؟
+  if(pr.dist>60){ offCount++; } else offCount=0;
+  if(offCount>=3 && !rerouting && now-lastReroute>15000){ doReroute(pos); return; }
+
+  // وصلنا؟
+  if(remaining<35){
+    speak('وصلت إلى وجهتك');
+    toast('وصلت إلى وجهتك 🏁');
+    stopNavigation(false);
+    return;
+  }
+
+  // الانعطافة الجاية
+  let k=1;
+  while(k<R.steps.length-1 && R.stepAt[k]<along-15) k++;
+  const step=R.steps[k];
+  const dist=Math.max(0,R.stepAt[k]-along);
+  const info=maneuverInfo(step);
+  $('navArrow').textContent=info.arrow;
+  $('navDist').textContent=fmtDist(dist);
+  $('navText').textContent=info.text;
+  voiceGuide(k,dist,info.text);
+
+  // الوقت والمسافة المتبقية
+  $('etaMin').textContent=Math.max(1,Math.round(remTime/60));
+  $('etaKm').textContent=(remaining/1000).toFixed(1);
+  $('etaClock').textContent=new Date(now+remTime*1000).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'});
+
+  checkHazards(pos,along);
+  maybeFetchLimit(pos,now);
+}
+
+function voiceGuide(k,dist,text){
+  const a=ann[k]||(ann[k]={});
+  const isArrive=R.steps[k].maneuver.type==='arrive';
+  if(dist<=80){
+    if(!a.n){ a.n=a.m=a.f=true; speak(isArrive?text:text+' الآن'); }
+  }else if(dist<=400){
+    if(!a.m){ a.m=a.f=true; speak('بعد '+sayDist(dist)+' '+text); }
+  }else if(dist<=1000){
+    if(!a.f){ a.f=true; speak('بعد '+sayDist(dist)+' '+text); }
+  }
+}
+
+async function doReroute(pos){
+  rerouting=true; lastReroute=Date.now();
+  speak('جاري إعادة حساب المسار');
+  toast('جاري إعادة حساب المسار...');
+  const ok=await buildRoute({silent:true,origin:pos});
+  rerouting=false; offCount=0;
+  if(!ok) toast('تعذر إعادة حساب المسار.');
+}
+
+/* ---------- حد السرعة (من OpenStreetMap) ---------- */
+function setLimit(v){
+  curLimit=v;
+  const el=$('limitBox');
+  if(v){ el.textContent=v; el.classList.remove('none'); }
+  else{ el.textContent='--'; el.classList.add('none'); }
+}
+async function overpass(q){
+  const r=await fetch('https://overpass-api.de/api/interpreter',{
+    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'data='+encodeURIComponent(q)
+  });
+  if(!r.ok) throw new Error('overpass');
+  return r.json();
+}
+async function maybeFetchLimit(pos,now){
+  if(now-lastLimitFetch<10000) return;
+  lastLimitFetch=now;
+  try{
+    const j=await overpass('[out:json][timeout:8];way(around:25,'+pos[1]+','+pos[0]+')["highway"]["maxspeed"];out tags 3;');
+    let v=null;
+    for(const w of (j.elements||[])){
+      const m=String(w.tags.maxspeed||'').match(/(\d+)/);
+      if(m){ v=parseInt(m[1],10); if(/mph/i.test(w.tags.maxspeed)) v=Math.round(v*1.609); break; }
+    }
+    setLimit(v);
+  }catch(e){}
+}
+
+/* ---------- البلاغات (سيطرة، ازدحام، حفرة، مطب، حادث، كاميرا) ---------- */
+const DAY=864e5, HR=36e5;
+const TYPES={
+  checkpoint:{icon:'🚧',label:'سيطرة',ttl:6*HR},
+  traffic:{icon:'🚗',label:'ازدحام',ttl:2*HR},
+  accident:{icon:'💥',label:'حادث',ttl:4*HR},
+  pothole:{icon:'🕳️',label:'حفرة',ttl:30*DAY},
+  bump:{icon:'⚠️',label:'مطب',ttl:30*DAY},
+  camera:{icon:'📷',label:'كاميرا مراقبة',ttl:90*DAY}
+};
+const KEY='darb_reports_v1', VKEY='darb_votes_v1';
+let reports=[];
+let reportMarkers={};
+
+function loadReports(){ try{ reports=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ reports=[]; } }
+function saveReports(){ try{ localStorage.setItem(KEY,JSON.stringify(reports)); }catch(e){} }
+function loadVotes(){ try{ return JSON.parse(localStorage.getItem(VKEY)||'{}'); }catch(e){ return {}; } }
+function saveVotes(v){ try{ localStorage.setItem(VKEY,JSON.stringify(v)); }catch(e){} }
+function activeReports(){
+  const now=Date.now();
+  return reports.filter(r=>TYPES[r.type] && now-r.t<TYPES[r.type].ttl);
+}
+loadReports();
+
+(function buildGrid(){
+  const g=$('reportGrid');
+  Object.keys(TYPES).forEach(k=>{
+    const b=document.createElement('button');
+    b.innerHTML='<span>'+TYPES[k].icon+'</span>'+TYPES[k].label;
+    b.onclick=()=>addReport(k);
+    g.appendChild(b);
+  });
+})();
+function openReport(){ $('reportSheet').classList.add('show'); }
+function closeReport(){ $('reportSheet').classList.remove('show'); }
+
+function addReport(type){
+  closeReport();
+  const pos=userPosition||[map.getCenter().lng,map.getCenter().lat];
+  const r={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    type,lat:pos[1],lng:pos[0],t:Date.now(),up:1,down:0};
+  reports.push(r);
+  const v=loadVotes(); v[r.id]=1; saveVotes(v);
+  saveReports(); renderReports();
+  toast('تم التبليغ عن '+TYPES[type].label+'. شكراً 🙏');
+  speak('تم التبليغ عن '+TYPES[type].label+'. شكراً');
+}
+function voteReport(r,up){
+  const v=loadVotes();
+  if(v[r.id]){ toast('صوّتت على هذا البلاغ من قبل.'); return; }
+  v[r.id]=1; saveVotes(v);
+  if(up){ r.up++; r.t=Date.now(); } else r.down++;
+  if(r.down>=2 && r.down>r.up){
+    reports=reports.filter(x=>x.id!==r.id);
+    toast('تم حذف البلاغ لأن أشخاص أكدوا إنه غير موجود.');
+  }else toast(up?'شكراً، تم تأكيد البلاغ ✔':'شكراً، تم تسجيل إنه غير موجود');
+  saveReports(); renderReports();
+}
+function renderReports(){
+  Object.values(reportMarkers).forEach(m=>m.remove());
+  reportMarkers={};
+  reports=activeReports(); saveReports();
+  reports.forEach(r=>{
+    const el=document.createElement('div'); el.className='hz'; el.textContent=TYPES[r.type].icon;
+    const mk=new maplibregl.Marker({element:el}).setLngLat([r.lng,r.lat])
+      .setPopup(new maplibregl.Popup({offset:16}).setDOMContent(popupFor(r))).addTo(map);
+    reportMarkers[r.id]=mk;
+  });
+}
+function ago(t){
+  const m=Math.round((Date.now()-t)/60000);
+  if(m<1) return 'قبل لحظات';
+  if(m<60) return 'قبل '+m+' دقيقة';
+  const h=Math.round(m/60);
+  if(h<48) return 'قبل '+h+' ساعة';
+  return 'قبل '+Math.round(h/24)+' يوم';
+}
+function popupFor(r){
+  const d=document.createElement('div'); d.className='pop';
+  d.innerHTML='<b>'+TYPES[r.type].icon+' '+TYPES[r.type].label+'</b><div class="pm">آخر تأكيد '+ago(r.t)+' · ✔ '+r.up+' · ✖ '+r.down+'</div>';
+  const row=document.createElement('div'); row.className='pb';
+  const y=document.createElement('button'); y.textContent='موجود ✔'; y.onclick=()=>voteReport(r,true);
+  const n=document.createElement('button'); n.textContent='مو موجود ✖'; n.className='danger'; n.onclick=()=>voteReport(r,false);
+  row.appendChild(y); row.appendChild(n); d.appendChild(row);
+  return d;
+}
+
+/* ---------- كاميرات السرعة من OpenStreetMap ---------- */
+let osmCams=new Map();
+let camMarkers={};
+async function loadCameras(bb){
+  try{
+    if(bb.e-bb.w>1.5||bb.n-bb.s>1.5) return;
+    const j=await overpass('[out:json][timeout:15];node["highway"="speed_camera"]('+bb.s+','+bb.w+','+bb.n+','+bb.e+');out;');
+    (j.elements||[]).forEach(n=>{
+      const id='o'+n.id;
+      if(osmCams.has(id)) return;
+      osmCams.set(id,{id,lat:n.lat,lng:n.lon});
+      const el=document.createElement('div'); el.className='hz'; el.textContent='📷';
+      const pop=document.createElement('div'); pop.className='pop';
+      pop.innerHTML='<b>📷 كاميرا سرعة</b><div class="pm">من بيانات OpenStreetMap</div>';
+      camMarkers[id]=new maplibregl.Marker({element:el}).setLngLat([n.lon,n.lat])
+        .setPopup(new maplibregl.Popup({offset:16}).setDOMContent(pop)).addTo(map);
+    });
+  }catch(e){}
+}
+function loadCamerasInView(){
+  if(map.getZoom()<11) return;
+  const b=map.getBounds();
+  loadCameras({w:b.getWest(),s:b.getSouth(),e:b.getEast(),n:b.getNorth()});
+}
+
+/* ---------- تنبيه الأخطار قدّامك أثناء القيادة ---------- */
+function checkHazards(pos,along){
+  const list=[];
+  activeReports().forEach(r=>list.push({id:r.id,lat:r.lat,lng:r.lng,label:TYPES[r.type].label,icon:TYPES[r.type].icon,rep:r}));
+  osmCams.forEach(c=>list.push({id:c.id,lat:c.lat,lng:c.lng,label:'كاميرا سرعة',icon:'📷',rep:null}));
+  for(const h of list){
+    if(alerted.has(h.id)) continue;
+    const hp=[h.lng,h.lat];
+    if(hav(pos,hp)>600) continue;
+    const pr=projectOnRoute(hp);
+    if(!pr||pr.dist>45) continue;
+    const ahead=pr.along*R.scale-along;
+    if(ahead>0&&ahead<400){
+      alerted.add(h.id);
+      showAlert(h,ahead);
+      break;
+    }
+  }
+}
+function showAlert(h,ahead){
+  currentAlertReport=h.rep;
+  $('alertIcon').textContent=h.icon;
+  $('alertText').textContent=h.label+' بعد '+fmtDist(ahead);
+  $('alertYes').style.display=h.rep?'':'none';
+  $('alertNo').style.display=h.rep?'':'none';
+  $('alertBox').classList.add('show');
+  speak('انتبه، '+h.label+' بعد '+sayDist(ahead));
+  clearTimeout(alertTimer);
+  alertTimer=setTimeout(hideAlert,12000);
+}
+function hideAlert(){ $('alertBox').classList.remove('show'); currentAlertReport=null; clearTimeout(alertTimer); }
+$('alertYes').onclick=()=>{ if(currentAlertReport) voteReport(currentAlertReport,true); hideAlert(); };
+$('alertNo').onclick=()=>{ if(currentAlertReport) voteReport(currentAlertReport,false); hideAlert(); };
+
+/* ---------- إشعار قصير ---------- */
+let toastEl=null,toastT=null;
+function toast(t){
+  if(!navigating){ message(t); return; }
+  if(!toastEl){
+    toastEl=document.createElement('div');
+    toastEl.className='panel';
+    toastEl.style.cssText='left:50%;transform:translateX(-50%);top:92px;padding:10px 16px;font-size:14px;z-index:10;max-width:90%;text-align:center';
+    document.body.appendChild(toastEl);
+  }
+  toastEl.textContent=t; toastEl.style.display='block';
+  clearTimeout(toastT); toastT=setTimeout(()=>toastEl.style.display='none',4000);
+}
+</script>
+</body>
+</html>
