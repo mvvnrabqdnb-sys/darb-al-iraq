@@ -3,323 +3,377 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ECLIPSE AI | Cybersecurity Academy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080c16">
+<title>ECLIPSE AI</title>
 <style>
-:root{--bg:#080d18;--panel:#111c2d;--line:#263750;--cyan:#55e6dc;--blue:#718cff;--text:#edf4ff;--muted:#9aabc2}
+:root{
+--bg:#080c16;--panel:#101827;--panel2:#151f31;
+--line:#26344b;--text:#edf3ff;--muted:#9aa9c2;
+--cyan:#61e6e1;--danger:#ff7777
+}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at top,#172e48,#080d18 55%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
-button,input,textarea{font:inherit}
-.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
-aside{background:#0b1321;border-left:1px solid var(--line);padding:22px}
-.logo{font-size:23px;font-weight:bold;color:var(--cyan);letter-spacing:2px;margin-bottom:30px}
-.logo small{display:block;font-size:10px;color:var(--muted);letter-spacing:3px}
-nav button{display:block;width:100%;text-align:right;background:transparent;border:1px solid transparent;color:#bdcce0;padding:13px;margin:5px 0;border-radius:10px;cursor:pointer}
-nav button:hover,nav button.active{background:#17283e;border-color:#34516c;color:white}
-main{padding:25px;min-width:0}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
-h1{font-size:25px;margin:0}
-p{color:var(--muted);line-height:1.7}
-button.action{background:linear-gradient(120deg,var(--cyan),var(--blue));border:0;color:#07121d;font-weight:bold;padding:11px 16px;border-radius:9px;cursor:pointer}
-button.secondary{background:#17283e;border:1px solid var(--line);color:white;padding:10px 14px;border-radius:9px;cursor:pointer}
-.page{display:none}.page.active{display:block}
-.hero,.card,.chat,.tool{background:linear-gradient(145deg,#142238,#101827);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:15px}
-.hero{padding:30px;background:linear-gradient(120deg,#142e42,#151b35)}
-.hero h2{font-size:30px;margin:8px 0}
-.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
-.tag{border:1px solid #35536b;color:#b8f5ed;padding:5px 10px;border-radius:30px;font-size:11px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:15px}
-.card h3,.tool h3{margin-top:0}
-.card p,.tool p{font-size:13px}
-.chat{height:65vh;display:flex;flex-direction:column;padding:12px}
-#messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:8px}
-.msg{white-space:pre-wrap;overflow-wrap:anywhere;max-width:90%;padding:12px;border-radius:12px;background:#19283c}
-.msg.user{align-self:flex-start;background:#1b3a50}
-.msg.ai{align-self:flex-end}
-.composer{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
-textarea,input{background:#080f1c;color:white;border:1px solid var(--line);border-radius:9px;padding:12px;width:100%}
-textarea{resize:vertical;min-height:55px}
-.field{margin:13px 0}
-.field label{display:block;color:#b8cce0;font-size:13px;margin-bottom:6px}
-.output{background:#080f1c;border:1px solid var(--line);border-radius:9px;padding:12px;margin-top:10px;overflow-wrap:anywhere;white-space:pre-wrap}
-.notice{padding:13px;border:1px solid #715b2d;background:#292315;color:#f5dca0;border-radius:10px;font-size:12px;margin:15px 0}
-.option{display:block;border:1px solid var(--line);padding:10px;margin:8px 0;border-radius:8px}
-footer{text-align:center;color:#71849f;font-size:11px;margin:30px}
-@media(max-width:850px){.app{grid-template-columns:1fr}aside{border-left:0;border-bottom:1px solid var(--line);padding:12px}.logo{margin:0 0 10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid{grid-template-columns:repeat(2,1fr)}main{padding:15px}}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.hero h2{font-size:23px}.chat{height:65vh}.msg{max-width:97%}}
+body{
+margin:0;background:radial-gradient(ellipse at 15% 0%,#142644 0,transparent 42%),var(--bg);
+color:var(--text);font-family:system-ui,Segoe UI,Tahoma,Arial,sans-serif;min-height:100vh
+}
+.app{max-width:1050px;margin:auto;min-height:100vh;display:flex;flex-direction:column;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#1a8e9a,#405bd5);font-weight:900;font-size:20px}
+h1{font-size:19px;margin:0;letter-spacing:1.5px}
+.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:11px;cursor:pointer;font:inherit;font-size:13px}
+button:hover{border-color:var(--cyan)}
+button:disabled{opacity:.5;cursor:not-allowed}
+main{flex:1;display:flex;flex-direction:column;min-height:0}
+.welcome{text-align:center;padding:46px 12px 25px}
+.orb{width:74px;height:74px;margin:0 auto 18px;border-radius:24px;background:linear-gradient(135deg,#173d51,#273b7c);display:grid;place-items:center;font-size:31px}
+.welcome h2{margin:0 0 10px;font-size:26px}
+.welcome p{color:var(--muted);max-width:650px;margin:0 auto;line-height:1.8;font-size:14px}
+.chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:20px}
+.chips button{font-size:12px;color:#c9d9f5}
+#chat{display:flex;flex-direction:column;gap:15px;padding:8px 0 20px}
+.msg{max-width:88%;padding:14px 16px;border:1px solid var(--line);border-radius:17px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.user{align-self:flex-start;background:#17243a;border-color:#304b70}
+.assistant{align-self:flex-end;background:var(--panel)}
+.who{font-size:11px;color:var(--cyan);margin-bottom:6px;font-weight:700}
+.status{color:var(--muted);font-size:12px;min-height:20px;padding:4px 3px}
+.composer{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 18%);padding:18px 0 8px}
+.composebox{display:flex;gap:9px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:9px}
+textarea{flex:1;resize:vertical;min-height:48px;max-height:180px;border:0;outline:0;background:transparent;color:var(--text);font:inherit;padding:10px;line-height:1.6}
+.send{background:linear-gradient(135deg,#167e91,#425bc1);border:0;min-width:76px;height:46px;font-weight:700}
+.foot{text-align:center;color:#71819b;font-size:11px;padding:10px 0 3px}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
+.modal.show{display:flex}
+.dialog{width:min(520px,100%);background:#111b2b;border:1px solid var(--line);border-radius:18px;padding:20px}
+.dialog h3{margin:0 0 12px}
+.dialog label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+.dialog input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#080e19;color:var(--text);font:inherit}
+.dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.hint{font-size:12px;color:var(--muted);line-height:1.7}
+.error{color:var(--danger)}
+@media(max-width:600px){
+.app{padding:12px}.welcome{padding-top:34px}
+.welcome h2{font-size:22px}.msg{max-width:96%}
+.header-actions button{padding:8px 9px}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<aside>
- <div class="logo">ECLIPSE AI<small>CYBERSECURITY ACADEMY</small></div>
- <nav>
-  <button class="active" onclick="page('home',this)">⌂ الرئيسية</button>
-  <button onclick="page('chat',this)">◈ المساعد الأمني</button>
-  <button onclick="page('labs',this)">⌘ المختبرات</button>
-  <button onclick="page('tools',this)">⚒ الأدوات</button>
-  <button onclick="page('learn',this)">▤ المعرفة</button>
-  <button onclick="page('settings',this)">⚙ الإعدادات</button>
- </nav>
-</aside>
-
-<main>
 <header>
- <div><h1>ECLIPSE AI</h1><p>Advanced Cybersecurity Student Platform</p></div>
- <button class="secondary" onclick="toggleLanguage()">عربي / English</button>
+ <div class="brand">
+  <div class="logo">E</div>
+  <div>
+   <h1>ECLIPSE AI</h1>
+   <div class="sub">CYBERSECURITY LEARNING ASSISTANT</div>
+  </div>
+ </div>
+ <div class="header-actions">
+  <button id="langBtn">English</button>
+  <button id="settingsBtn">الإعدادات ⚙</button>
+  <button id="clearBtn">محادثة جديدة</button>
+ </div>
 </header>
 
-<section class="page active" id="home">
- <div class="hero">
-  <small style="color:var(--cyan)">ADVANCED CYBERSECURITY AI</small>
-  <h2>تعلّم الأمن السيبراني. افهم التهديدات. ابنِ دفاعات أقوى.</h2>
-  <p>منصة تعليمية متقدمة للطلاب والباحثين في الأمن السيبراني والاختبار الأخلاقي وتحليل البرمجيات والحماية الرقمية.</p>
-  <div class="tags">
-   <span class="tag">ETHICAL HACKING</span>
-   <span class="tag">MALWARE ANALYSIS</span>
-   <span class="tag">DIGITAL FORENSICS</span>
-   <span class="tag">NETWORK SECURITY</span>
-   <span class="tag">CTF LABS</span>
+<main>
+ <section class="welcome" id="welcome">
+  <div class="orb">⌁</div>
+  <h2>مرحباً بك في ECLIPSE AI</h2>
+  <p>مساعدك لتعلّم الأمن السيبراني، الشبكات، البرمجة الآمنة، التحليل الجنائي الرقمي واختبارات CTF ضمن بيئة قانونية ومصرّح بها.</p>
+  <div class="chips">
+   <button data-prompt="اشرح لي أساسيات أمن الشبكات من الصفر مع أمثلة آمنة.">أساسيات الشبكات</button>
+   <button data-prompt="علّمني كيف أبدأ في CTF للمبتدئين مع تحدٍ تدريبي آمن.">تدريب CTF</button>
+   <button data-prompt="ما خطوات فحص أمان موقع أملكه أو لدي تصريح لاختباره؟">فحص أمني مصرّح</button>
+   <button data-prompt="اشرح مبادئ تحليل البرمجيات الخبيثة بطريقة آمنة ودفاعية.">تحليل البرمجيات</button>
   </div>
-  <button class="action" onclick="page('chat')">ابدأ المحادثة</button>
- </div>
- <h2>المجالات الرئيسية</h2>
- <div class="grid">
-  <div class="card"><h3>Ethical Hacking</h3><p>تعليم اختبار الاختراق الأخلاقي ضمن الأنظمة المصرح بها.</p></div>
-  <div class="card"><h3>Malware Analysis</h3><p>تحليل البرمجيات المشبوهة وفهم سلوكها وطرق اكتشافها.</p></div>
-  <div class="card"><h3>Secure Coding</h3><p>كتابة الأكواد الآمنة واكتشاف الأخطاء البرمجية.</p></div>
-  <div class="card"><h3>Digital Forensics</h3><p>التحقيق الرقمي وتحليل السجلات والأدلة.</p></div>
-  <div class="card"><h3>CTF Academy</h3><p>تحديات تعليمية وتدريبات عملية.</p></div>
-  <div class="card"><h3>Network Defense</h3><p>مراقبة الشبكات وتحليل الأنشطة المشبوهة.</p></div>
- </div>
- <div class="notice">استخدم هذه المنصة للتعلم والاختبار على الأنظمة التي تملكها أو لديك تصريح باختبارها فقط.</div>
-</section>
-
-<section class="page" id="chat">
- <h2>المساعد الأمني الذكي</h2>
- <p>اسأل عن البرمجة الأمنية، تحليل الأكواد، الشبكات، الثغرات، والدفاع الرقمي.</p>
- <div class="chat">
-  <div id="messages">
-   <div class="msg ai">أهلاً بك في ECLIPSE AI. كيف أساعدك في الأمن السيبراني؟</div>
-  </div>
-  <div class="composer">
-   <textarea id="prompt" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
-   <button class="action" id="send" onclick="sendMessage()">إرسال</button>
-  </div>
- </div>
-</section>
-
-<section class="page" id="labs">
- <h2>المختبرات التعليمية</h2>
- <div class="card">
-  <h3>المختبر 01: تخزين كلمات المرور</h3>
-  <p>ما الطريقة الأفضل لتخزين كلمات المرور في تطبيق جامعي؟</p>
-  <label class="option"><input type="radio" name="q1" value="a"> تخزينها كنص واضح</label>
-  <label class="option"><input type="radio" name="q1" value="b"> استخدام Argon2id أو bcrypt مع salt فريد</label>
-  <label class="option"><input type="radio" name="q1" value="c"> وضع كلمة المرور داخل كود الواجهة</label>
-  <button class="action" onclick="quiz()">تحقق من الإجابة</button>
-  <div class="output" id="quizResult"></div>
- </div>
- <div class="card">
-  <h3>المختبر 02: أقل صلاحية</h3>
-  <p>موظف يحتاج قراءة التقارير فقط. ما الصلاحية المناسبة؟</p>
-  <p>الإجابة الصحيحة: منحه صلاحية قراءة التقارير فقط دون صلاحيات إدارية إضافية.</p>
- </div>
-</section>
-
-<section class="page" id="tools">
- <h2>أدوات الأمن السيبراني</h2>
- <div class="grid">
-  <div class="tool">
-   <h3>SHA-256</h3>
-   <p>حساب بصمة نص تجريبي.</p>
-   <textarea id="hashInput" placeholder="اكتب النص"></textarea>
-   <button class="action" onclick="hashText()">احسب</button>
-   <div class="output" id="hashOutput"></div>
-  </div>
-  <div class="tool">
-   <h3>Base64</h3>
-   <p>ترميز وفك ترميز النصوص، وليس تشفيراً.</p>
-   <textarea id="baseInput" placeholder="النص"></textarea>
-   <button class="secondary" onclick="baseEncode()">Encode</button>
-   <button class="secondary" onclick="baseDecode()">Decode</button>
-   <div class="output" id="baseOutput"></div>
-  </div>
-  <div class="tool">
-   <h3>URL Encoder</h3>
-   <textarea id="urlInput" placeholder="النص"></textarea>
-   <button class="secondary" onclick="urlEncode()">Encode</button>
-   <button class="secondary" onclick="urlDecode()">Decode</button>
-   <div class="output" id="urlOutput"></div>
-  </div>
-  <div class="tool">
-   <h3>JWT Inspector</h3>
-   <p>يعرض بيانات JWT دون التحقق من التوقيع.</p>
-   <textarea id="jwtInput" placeholder="ضع JWT تجريبي هنا"></textarea>
-   <button class="action" onclick="inspectJWT()">تحليل</button>
-   <div class="output" id="jwtOutput"></div>
-  </div>
- </div>
- <div class="notice">استخدم بيانات تجريبية فقط. لا تضع مفاتيح API أو كلمات مرور أو رموز جلسات حقيقية.</div>
-</section>
-
-<section class="page" id="learn">
- <h2>المعرفة والمفاهيم</h2>
- <div class="grid">
-  <div class="card"><h3>OWASP Top 10</h3><p>أهم مخاطر تطبيقات الويب وطرق الوقاية منها.</p></div>
-  <div class="card"><h3>Linux & CLI</h3><p>إدارة الملفات والصلاحيات والعمليات والسجلات.</p></div>
-  <div class="card"><h3>TCP/IP & DNS</h3><p>البروتوكولات والمنافذ وتحليل حركة الشبكة.</p></div>
-  <div class="card"><h3>Cryptography</h3><p>التشفير والتجزئة والتوقيعات الرقمية.</p></div>
-  <div class="card"><h3>Incident Response</h3><p>اكتشاف الحوادث واحتواؤها ومعالجتها.</p></div>
-  <div class="card"><h3>Secure SDLC</h3><p>إدخال الأمن في مراحل تطوير البرمجيات.</p></div>
- </div>
-</section>
-
-<section class="page" id="settings">
- <h2>إعدادات الذكاء الاصطناعي</h2>
- <div class="card">
-  <div class="notice">هذه نسخة تجريبية بواجهة أمامية فقط. المفتاح المخزن في المتصفح يمكن كشفه. لا تستخدم مفتاحاً مشتركاً على موقع عام. للنشر الحقيقي نحتاج Backend لحماية المفتاح.</div>
-  <div class="field">
-   <label>Gemini API Key</label>
-   <input type="password" id="apiKey" placeholder="ضع مفتاح Gemini هنا">
-  </div>
-  <div class="field">
-   <label>Model ID</label>
-   <input id="model" value="gemini-3.8-flash">
-  </div>
-  <button class="action" onclick="saveSettings()">حفظ الإعدادات</button>
-  <button class="secondary" onclick="testConnection()">اختبار الاتصال</button>
-  <div class="output" id="status"></div>
- </div>
-</section>
-
-<footer>ECLIPSE AI • CYBERSECURITY ACADEMY</footer>
+ </section>
+ <section id="chat" aria-live="polite"></section>
+ <div class="status" id="status"></div>
 </main>
+
+<div class="composer">
+ <div class="composebox">
+  <textarea id="question" rows="1" placeholder="اكتب سؤالك في الأمن السيبراني..."></textarea>
+  <button class="send" id="sendBtn">إرسال ↑</button>
+ </div>
+ <div class="foot">ECLIPSE AI • تعلّم واختبر فقط على الأنظمة التي تملكها أو لديك تصريح لاختبارها</div>
+</div>
+</div>
+
+<div class="modal" id="settingsModal">
+ <div class="dialog">
+  <h3>إعدادات الاتصال</h3>
+  <label for="apiKey">Gemini API Key</label>
+  <input id="apiKey" type="password" placeholder="ألصق مفتاح Gemini هنا" autocomplete="off">
+  <label for="model">اسم الموديل</label>
+  <input id="model" value="gemini-3.8-flash">
+  <p class="hint">المفتاح يُحفظ في هذا المتصفح فقط. لا تنشر الصفحة للعموم وهي تحتوي مفتاح API؛ للموقع العام استخدم خادماً وسيطاً يحمي المفتاح.</p>
+  <div class="row">
+   <button id="closeSettings">إلغاء</button>
+   <button id="saveSettings">حفظ الإعدادات</button>
+  </div>
+ </div>
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-let history=[];
-let english=false;
+const $ = id => document.getElementById(id);
 
-function page(name,button){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
- $(name).classList.add('active');
- document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
- if(button)button.classList.add('active');
+const systemPrompt = `You are ECLIPSE AI, a clear, patient cybersecurity education assistant for university students. Teach in Arabic by default, and use English when requested. Topics: networking, defensive security, secure coding, digital forensics, safe malware analysis, security fundamentals, and legal CTF labs. Give structured explanations, practical defensive examples, and clarify assumptions. Only assist with systems the learner owns or is explicitly authorized to test. Do not provide instructions, code, or operational steps that enable unauthorized access, credential theft, stealth, persistence, destructive malware, exfiltration, or evasion. For risky requests, briefly explain the boundary and redirect to defensive detection, hardening, or a harmless toy lab. Never claim an action was performed.`;
+
+let history = [];
+let busy = false;
+let currentLang = "ar";
+let controller = null;
+
+function setStatus(text,error=false){
+ $("status").textContent=text;
+ $("status").className="status"+(error?" error":"");
 }
 
-function toggleLanguage(){
- english=!english;
- document.documentElement.lang=english?'en':'ar';
- document.documentElement.dir=english?'ltr':'rtl';
- alert(english?'The interface language direction changed. Some content remains Arabic in this prototype.':'تمت إعادة اتجاه الواجهة للعربية.');
+function addMessage(role,text){
+ const welcome=$("welcome");
+ if(welcome) welcome.style.display="none";
+
+ const box=document.createElement("div");
+ box.className="msg "+(role==="user"?"user":"assistant");
+
+ const who=document.createElement("div");
+ who.className="who";
+ who.textContent=role==="user"?(currentLang==="ar"?"أنت":"You"):"ECLIPSE AI";
+
+ const body=document.createElement("div");
+ body.textContent=text;
+
+ box.append(who,body);
+ $("chat").appendChild(box);
+ box.scrollIntoView({behavior:"smooth",block:"end"});
+ return body;
 }
 
-function saveSettings(){
- localStorage.setItem('eclipse_key',$('apiKey').value.trim());
- localStorage.setItem('eclipse_model',$('model').value.trim()||'gemini-3.8-flash');
- $('status').textContent='تم حفظ الإعدادات في هذا المتصفح.';
+function getConfig(){
+ return {
+  key:localStorage.getItem("eclipse_gemini_key")||"",
+  model:localStorage.getItem("eclipse_gemini_model")||"gemini-3.8-flash"
+ };
 }
 
-function addMessage(text,type){
- const el=document.createElement('div');
- el.className='msg '+type;
- el.textContent=text;
- $('messages').appendChild(el);
- $('messages').scrollTop=$('messages').scrollHeight;
+function setBusy(v){
+ busy=v;
+ $("sendBtn").disabled=v;
+ $("sendBtn").textContent=v?"...":"إرسال ↑";
+ $("question").disabled=v;
 }
 
-const systemPrompt=`You are ECLIPSE AI, an advanced bilingual cybersecurity academic assistant for university students. Teach advanced cybersecurity clearly. Focus on ethical hacking in authorized labs, secure coding, defensive security, malware analysis for detection, digital forensics, network defense, incident response, cryptography, and CTF education. Ask for scope and authorization when real systems are involved. Do not provide operational instructions or code for unauthorized access, credential theft, destructive malware, ransomware deployment, persistence, evasion, or attacks on real targets. For malware topics, provide safe analysis, indicators of compromise, detection logic, sandboxing concepts, and harmless simulations. Prefer defensive examples and mitigations. Never claim code was executed. Never request secrets, passwords, API keys, or real tokens. Respond in the language used by the student.`;
+function parseSSEBlock(block){
+ const lines=block.split(/\r?\n/);
+ let out="";
+ for(const line of lines){
+  if(line.startsWith("data:")){
+   const raw=line.slice(5).trim();
+   if(!raw||raw==="[DONE]") continue;
+   try{
+    const obj=JSON.parse(raw);
+    out+=(obj.candidates?.[0]?.content?.parts||[])
+      .map(p=>p.text||"").join("");
+   }catch(e){}
+  }
+ }
+ return out;
+}
 
-async function sendMessage(){
- const q=$('prompt').value.trim();
- if(!q)return;
- const key=localStorage.getItem('eclipse_key');
- const model=localStorage.getItem('eclipse_model')||'gemini-3.8-flash';
- if(!key){addMessage('أضف مفتاح Gemini API من الإعدادات أولاً.','ai');page('settings');return}
- $('prompt').value='';
- addMessage(q,'user');
- $('send').disabled=true;
- $('send').textContent='...';
+async function streamGemini(prompt,target){
+ const {key,model}=getConfig();
+
+ if(!key){
+  $("settingsModal").classList.add("show");
+  setStatus("أضف مفتاح Gemini من الإعدادات أولاً.",true);
+  return null;
+ }
+
+ const contents=[
+  ...history.slice(-8),
+  {role:"user",parts:[{text:prompt}]}
+ ];
+
+ const url=
+ `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
+
+ controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),120000);
+
  try{
-  const contents=[...history,{role:'user',parts:[{text:q}]}];
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
   const response=await fetch(url,{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
    body:JSON.stringify({
     systemInstruction:{parts:[{text:systemPrompt}]},
     contents,
-    generationConfig:{maxOutputTokens:4096}
-   })
+    generationConfig:{
+     maxOutputTokens:2048,
+     temperature:0.55
+    }
+   }),
+   signal:controller.signal
   });
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.error?.message||'API error');
-  const answer=data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('\n')||'لم يصل رد نصي.';
-  history.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:answer}]});
-  if(history.length>20)history=history.slice(-20);
-  addMessage(answer,'ai');
- }catch(error){
-  addMessage('حدث خطأ: '+error.message,'ai');
+
+  if(!response.ok){
+   let detail="";
+   try{
+    const j=await response.json();
+    detail=j.error?.message||JSON.stringify(j);
+   }catch(e){
+    detail=response.statusText;
+   }
+   throw new Error(`Gemini API (${response.status}): ${detail}`);
+  }
+
+  if(!response.body)
+   throw new Error("المتصفح لا يدعم بث الردود؛ جرّب متصفحاً أحدث.");
+
+  const reader=response.body.getReader();
+  const decoder=new TextDecoder();
+  let buffer="";
+  let answer="";
+
+  while(true){
+   const {value,done}=await reader.read();
+   if(done) break;
+
+   buffer+=decoder.decode(value,{stream:true});
+   const blocks=buffer.split(/\r?\n\r?\n/);
+   buffer=blocks.pop()||"";
+
+   for(const block of blocks){
+    const piece=parseSSEBlock(block);
+    if(piece){
+     answer+=piece;
+     target.textContent=answer;
+     target.parentElement.scrollIntoView({
+      behavior:"smooth",block:"end"
+     });
+    }
+   }
+  }
+
+  if(buffer){
+   const piece=parseSSEBlock(buffer);
+   answer+=piece;
+   target.textContent=answer;
+  }
+
+  if(!answer.trim())
+   throw new Error("وصل رد فارغ من الموديل. جرّب مرة ثانية أو تحقق من اسم الموديل.");
+
+  return answer;
+
  }finally{
-  $('send').disabled=false;
-  $('send').textContent='إرسال';
+  clearTimeout(timeout);
+  controller=null;
  }
 }
 
-async function testConnection(){
- saveSettings();
- const key=localStorage.getItem('eclipse_key');
- const model=localStorage.getItem('eclipse_model');
- if(!key){$('status').textContent='أدخل مفتاح API أولاً.';return}
- $('status').textContent='جارٍ اختبار الاتصال...';
+async function sendMessage(){
+ if(busy) return;
+
+ const input=$("question");
+ const q=input.value.trim();
+ if(!q) return;
+
+ input.value="";
+ addMessage("user",q);
+ const target=addMessage("assistant","");
+ setBusy(true);
+ setStatus("جاري الاتصال وكتابة الرد مباشرة...");
+
  try{
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`,{
-   method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({contents:[{role:'user',parts:[{text:'Reply OK'}]}],generationConfig:{maxOutputTokens:20}})
-  });
-  const d=await r.json();
-  if(!r.ok)throw Error(d.error?.message||'API error');
-  $('status').textContent='الاتصال ناجح.';
- }catch(e){$('status').textContent='فشل الاتصال: '+e.message}
+  const answer=await streamGemini(q,target);
+
+  if(answer){
+   history.push(
+    {role:"user",parts:[{text:q}]},
+    {role:"model",parts:[{text:answer}]}
+   );
+   if(history.length>8) history=history.slice(-8);
+   setStatus("اكتمل الرد.");
+  }else if(!target.textContent){
+   target.parentElement.remove();
+  }
+
+ }catch(err){
+  target.textContent="تعذر إكمال الطلب: "+
+   (err.name==="AbortError"
+    ?"انتهت مهلة الاتصال بعد دقيقتين."
+    :err.message);
+  setStatus("تحقق من الإنترنت ومفتاح API واسم الموديل.",true);
+
+ }finally{
+  setBusy(false);
+  input.focus();
+ }
 }
 
-function quiz(){
- const answer=document.querySelector('input[name="q1"]:checked');
- $('quizResult').textContent=!answer?'اختر إجابة أولاً.':answer.value==='b'?'إجابة صحيحة!':'حاول مرة أخرى. استخدم خوارزمية تجزئة كلمات مرور مخصصة مثل Argon2id.';
-}
+$("sendBtn").addEventListener("click",sendMessage);
 
-async function hashText(){
- try{
-  const data=await crypto.subtle.digest('SHA-256',new TextEncoder().encode($('hashInput').value));
-  $('hashOutput').textContent=[...new Uint8Array(data)].map(x=>x.toString(16).padStart(2,'0')).join('');
- }catch(e){$('hashOutput').textContent='تحتاج هذه الأداة إلى HTTPS أو localhost.'}
-}
-function baseEncode(){
- try{$('baseOutput').textContent=btoa(unescape(encodeURIComponent($('baseInput').value)))}
- catch(e){$('baseOutput').textContent='تعذر الترميز'}
-}
-function baseDecode(){
- try{$('baseOutput').textContent=decodeURIComponent(escape(atob($('baseInput').value.trim())))}
- catch(e){$('baseOutput').textContent='Base64 غير صالح'}
-}
-function urlEncode(){$('urlOutput').textContent=encodeURIComponent($('urlInput').value)}
-function urlDecode(){
- try{$('urlOutput').textContent=decodeURIComponent($('urlInput').value)}
- catch(e){$('urlOutput').textContent='النص غير صالح'}
-}
-function inspectJWT(){
- try{
-  const parts=$('jwtInput').value.trim().split('.');
-  if(parts.length!==3)throw Error('JWT يحتاج ثلاثة أجزاء');
-  const decode=s=>JSON.stringify(JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))))),null,2);
-  $('jwtOutput').textContent='HEADER:\n'+decode(parts[0])+'\n\nPAYLOAD:\n'+decode(parts[1])+'\n\nالتوقيع لم يتم التحقق منه.';
- }catch(e){$('jwtOutput').textContent='تعذر التحليل: '+e.message}
-}
+$("question").addEventListener("keydown",e=>{
+ if(e.key==="Enter"&&!e.shiftKey){
+  e.preventDefault();
+  sendMessage();
+ }
+});
 
-$('apiKey').value=localStorage.getItem('eclipse_key')||'';
-$('model').value=localStorage.getItem('eclipse_model')||'gemini-3.8-flash';
+document.querySelectorAll("[data-prompt]").forEach(b=>{
+ b.addEventListener("click",()=>{
+  $("question").value=b.dataset.prompt;
+  sendMessage();
+ });
+});
+
+$("settingsBtn").onclick=()=>{
+ const c=getConfig();
+ $("apiKey").value=c.key;
+ $("model").value=c.model;
+ $("settingsModal").classList.add("show");
+};
+
+$("closeSettings").onclick=()=>{
+ $("settingsModal").classList.remove("show");
+};
+
+$("saveSettings").onclick=()=>{
+ const key=$("apiKey").value.trim();
+ const model=$("model").value.trim();
+
+ if(!key||!model){
+  setStatus("أدخل المفتاح واسم الموديل.",true);
+  return;
+ }
+
+ localStorage.setItem("eclipse_gemini_key",key);
+ localStorage.setItem("eclipse_gemini_model",model);
+ $("settingsModal").classList.remove("show");
+ setStatus("تم حفظ الإعدادات على هذا المتصفح.");
+};
+
+$("clearBtn").onclick=()=>{
+ if(busy&&controller) controller.abort();
+ history=[];
+ $("chat").innerHTML="";
+ $("welcome").style.display="block";
+ setStatus("بدأت محادثة جديدة.");
+};
+
+$("langBtn").onclick=()=>{
+ currentLang=currentLang==="ar"?"en":"ar";
+ document.documentElement.lang=currentLang;
+ document.documentElement.dir=currentLang==="ar"?"rtl":"ltr";
+ $("langBtn").textContent=currentLang==="ar"?"English":"العربية";
+ $("question").placeholder=currentLang==="ar"
+  ?"اكتب سؤالك في الأمن السيبراني..."
+  :"Ask a cybersecurity question...";
+};
 </script>
 </body>
 </html>
