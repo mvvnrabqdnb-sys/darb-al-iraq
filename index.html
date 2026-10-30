@@ -3,616 +3,323 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#080b18">
-<title>ECLIPSE AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ECLIPSE AI | Cybersecurity Academy</title>
 <style>
-:root {
-  --bg:#080b18;
-  --panel:#10162a;
-  --panel2:#151e36;
-  --border:#25304d;
-  --text:#f3f5ff;
-  --muted:#929bb5;
-  --blue:#547cff;
-  --purple:#865cff;
-}
+:root{--bg:#080d18;--panel:#111c2d;--line:#263750;--cyan:#55e6dc;--blue:#718cff;--text:#edf4ff;--muted:#9aabc2}
 *{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:Arial,Tahoma,sans-serif;height:100dvh;
-  overflow:hidden;
-}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-.app{height:100dvh;display:flex}
-.sidebar{
-  width:280px;background:#0b1020;border-left:1px solid var(--border);
-  padding:18px;display:flex;flex-direction:column;gap:16px;
-}
-.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}
-.logo-icon{
-  width:42px;height:42px;border-radius:14px;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  display:grid;place-items:center;font-size:23px;
-}
-.newchat,.side-btn{
-  border:1px solid var(--border);background:var(--panel);
-  color:var(--text);padding:13px;border-radius:12px;text-align:right;
-}
-.newchat:hover,.side-btn:hover{background:var(--panel2)}
-.history-title{color:var(--muted);font-size:12px}
-.history{flex:1;overflow:auto;display:flex;flex-direction:column;gap:7px}
-.history-item{
-  padding:12px;border-radius:10px;background:transparent;
-  border:1px solid transparent;color:var(--text);
-  text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.history-item.active,.history-item:hover{
-  background:var(--panel2);border-color:var(--border)
-}
-.sidebar-bottom{display:grid;gap:9px}
-.main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{
-  height:66px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 22px;background:#0b1020;
-}
-.provider{
-  background:var(--panel);border:1px solid var(--border);
-  color:var(--text);padding:10px 14px;border-radius:12px;
-}
-.status{font-size:12px;color:var(--muted);margin-right:8px}
-.online{color:#52d69b}
-.top-actions{display:flex;gap:8px}
-.iconbtn{
-  background:var(--panel);border:1px solid var(--border);
-  color:white;border-radius:10px;padding:9px 12px;
-}
-.chat{
-  flex:1;overflow-y:auto;padding:28px 16px 20px;
-  scroll-behavior:smooth;
-}
-.welcome{
-  min-height:100%;display:flex;align-items:center;
-  justify-content:center;text-align:center;
-}
-.welcome-inner{max-width:650px;width:100%;padding:20px}
-.welcome-logo{
-  width:75px;height:75px;border-radius:24px;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  display:grid;place-items:center;margin:0 auto 22px;font-size:36px;
-  box-shadow:0 0 45px #547cff40;
-}
-.welcome h1{font-size:34px;margin:0 0 12px}
-.welcome p{color:var(--muted);line-height:1.8}
-.suggestions{
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px
-}
-.suggestion{
-  border:1px solid var(--border);background:var(--panel);
-  color:var(--text);padding:15px;border-radius:14px;text-align:right;
-}
-.suggestion:hover{border-color:var(--blue)}
-.messages{max-width:850px;margin:auto;display:flex;flex-direction:column;gap:22px}
-.message{display:flex;gap:12px;align-items:flex-start}
-.avatar{
-  min-width:37px;height:37px;border-radius:12px;
-  display:grid;place-items:center;background:var(--panel2);
-  font-weight:bold;
-}
-.message.user .avatar{background:#283d77}
-.bubble{max-width:100%;min-width:0;line-height:1.9;overflow-wrap:anywhere}
-.message-label{font-size:12px;color:var(--muted);margin-bottom:5px}
-.message-content{white-space:pre-wrap}
-.message-actions{margin-top:8px}
-.copy-btn{
-  background:transparent;color:var(--muted);
-  border:1px solid var(--border);padding:5px 10px;border-radius:8px;font-size:12px;
-}
-.composer-wrap{padding:12px 18px 22px}
-.composer{max-width:850px;margin:auto}
-.input-box{
-  display:flex;align-items:flex-end;gap:10px;
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:18px;padding:12px;
-}
-.input-box:focus-within{border-color:var(--blue)}
-#prompt{
-  flex:1;resize:none;max-height:150px;min-height:40px;
-  border:0;outline:0;background:transparent;color:white;
-  padding:9px;line-height:1.6;
-}
-.send{
-  width:43px;height:43px;border:0;border-radius:13px;
-  color:white;background:linear-gradient(135deg,var(--blue),var(--purple));
-  font-size:20px;
-}
-.send:disabled{opacity:.5}
-.composer-note{text-align:center;color:var(--muted);font-size:11px;margin-top:10px}
-.overlay{
-  position:fixed;inset:0;background:#000b;display:none;
-  align-items:center;justify-content:center;padding:15px;z-index:10;
-}
-.overlay.show{display:flex}
-.modal{
-  width:min(520px,100%);max-height:90dvh;overflow:auto;
-  background:#10162a;border:1px solid var(--border);
-  border-radius:20px;padding:22px;
-}
-.modal h2{margin:0 0 8px}
-.modal p{color:var(--muted);font-size:13px;line-height:1.7}
-.field{margin-top:17px}
-.field label{display:block;color:#bbc4dc;font-size:13px;margin-bottom:8px}
-.field input,.field select{
-  width:100%;padding:13px;border-radius:11px;
-  background:#080d1c;border:1px solid var(--border);
-  color:white;outline:none;
-}
-.field input:focus{border-color:var(--blue)}
-.modal-actions{display:flex;gap:10px;margin-top:22px}
-.primary,.secondary{
-  flex:1;padding:13px;border-radius:11px;border:0;
-  color:white;background:linear-gradient(135deg,var(--blue),var(--purple));
-}
-.secondary{background:var(--panel2);border:1px solid var(--border)}
-.notice{
-  background:#292238;border:1px solid #54406b;
-  padding:12px;border-radius:12px;color:#d8c8ef;
-  font-size:12px;line-height:1.8;margin-top:15px;
-}
-.typing{color:var(--muted);font-size:13px}
-.mobile-menu{display:none}
-@media(max-width:700px){
-  .sidebar{
-    position:fixed;z-index:5;top:0;bottom:0;right:-290px;
-    transition:right .2s;box-shadow:0 0 30px #0008;
-  }
-  .sidebar.open{right:0}
-  .mobile-menu{display:inline-block}
-  .topbar{padding:0 12px}
-  .chat{padding:17px 12px}
-  .composer-wrap{padding:10px 10px 14px}
-  .welcome h1{font-size:27px}
-  .suggestions{grid-template-columns:1fr}
-}
+body{margin:0;background:radial-gradient(circle at top,#172e48,#080d18 55%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
+button,input,textarea{font:inherit}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+aside{background:#0b1321;border-left:1px solid var(--line);padding:22px}
+.logo{font-size:23px;font-weight:bold;color:var(--cyan);letter-spacing:2px;margin-bottom:30px}
+.logo small{display:block;font-size:10px;color:var(--muted);letter-spacing:3px}
+nav button{display:block;width:100%;text-align:right;background:transparent;border:1px solid transparent;color:#bdcce0;padding:13px;margin:5px 0;border-radius:10px;cursor:pointer}
+nav button:hover,nav button.active{background:#17283e;border-color:#34516c;color:white}
+main{padding:25px;min-width:0}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:25px;margin:0}
+p{color:var(--muted);line-height:1.7}
+button.action{background:linear-gradient(120deg,var(--cyan),var(--blue));border:0;color:#07121d;font-weight:bold;padding:11px 16px;border-radius:9px;cursor:pointer}
+button.secondary{background:#17283e;border:1px solid var(--line);color:white;padding:10px 14px;border-radius:9px;cursor:pointer}
+.page{display:none}.page.active{display:block}
+.hero,.card,.chat,.tool{background:linear-gradient(145deg,#142238,#101827);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:15px}
+.hero{padding:30px;background:linear-gradient(120deg,#142e42,#151b35)}
+.hero h2{font-size:30px;margin:8px 0}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.tag{border:1px solid #35536b;color:#b8f5ed;padding:5px 10px;border-radius:30px;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:15px}
+.card h3,.tool h3{margin-top:0}
+.card p,.tool p{font-size:13px}
+.chat{height:65vh;display:flex;flex-direction:column;padding:12px}
+#messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:8px}
+.msg{white-space:pre-wrap;overflow-wrap:anywhere;max-width:90%;padding:12px;border-radius:12px;background:#19283c}
+.msg.user{align-self:flex-start;background:#1b3a50}
+.msg.ai{align-self:flex-end}
+.composer{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+textarea,input{background:#080f1c;color:white;border:1px solid var(--line);border-radius:9px;padding:12px;width:100%}
+textarea{resize:vertical;min-height:55px}
+.field{margin:13px 0}
+.field label{display:block;color:#b8cce0;font-size:13px;margin-bottom:6px}
+.output{background:#080f1c;border:1px solid var(--line);border-radius:9px;padding:12px;margin-top:10px;overflow-wrap:anywhere;white-space:pre-wrap}
+.notice{padding:13px;border:1px solid #715b2d;background:#292315;color:#f5dca0;border-radius:10px;font-size:12px;margin:15px 0}
+.option{display:block;border:1px solid var(--line);padding:10px;margin:8px 0;border-radius:8px}
+footer{text-align:center;color:#71849f;font-size:11px;margin:30px}
+@media(max-width:850px){.app{grid-template-columns:1fr}aside{border-left:0;border-bottom:1px solid var(--line);padding:12px}.logo{margin:0 0 10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid{grid-template-columns:repeat(2,1fr)}main{padding:15px}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.hero h2{font-size:23px}.chat{height:65vh}.msg{max-width:97%}}
 </style>
 </head>
 <body>
 <div class="app">
-
-<aside class="sidebar" id="sidebar">
-  <div class="logo">
-    <div class="logo-icon">✦</div>
-    <span>ECLIPSE AI</span>
-  </div>
-
-  <button class="newchat" onclick="newChat()">＋ محادثة جديدة</button>
-
-  <div class="history-title">المحادثات السابقة</div>
-  <div class="history" id="history"></div>
-
-  <div class="sidebar-bottom">
-    <button class="side-btn" onclick="openSettings()">⚙ الإعدادات</button>
-    <button class="side-btn" onclick="clearAll()">🗑 حذف كل المحادثات</button>
-  </div>
+<aside>
+ <div class="logo">ECLIPSE AI<small>CYBERSECURITY ACADEMY</small></div>
+ <nav>
+  <button class="active" onclick="page('home',this)">⌂ الرئيسية</button>
+  <button onclick="page('chat',this)">◈ المساعد الأمني</button>
+  <button onclick="page('labs',this)">⌘ المختبرات</button>
+  <button onclick="page('tools',this)">⚒ الأدوات</button>
+  <button onclick="page('learn',this)">▤ المعرفة</button>
+  <button onclick="page('settings',this)">⚙ الإعدادات</button>
+ </nav>
 </aside>
 
-<main class="main">
-  <header class="topbar">
-    <div style="display:flex;align-items:center">
-      <button class="iconbtn mobile-menu" onclick="toggleSidebar()">☰</button>
-      <button class="provider" onclick="openSettings()">
-        <span id="providerName">غير متصل</span>
-        <span class="status" id="status">● غير متصل</span>
-      </button>
-    </div>
-    <div class="top-actions">
-      <button class="iconbtn" onclick="openSettings()">⚙</button>
-    </div>
-  </header>
+<main>
+<header>
+ <div><h1>ECLIPSE AI</h1><p>Advanced Cybersecurity Student Platform</p></div>
+ <button class="secondary" onclick="toggleLanguage()">عربي / English</button>
+</header>
 
-  <section class="chat" id="chat">
-    <div class="welcome" id="welcome">
-      <div class="welcome-inner">
-        <div class="welcome-logo">✦</div>
-        <h1>مرحباً بك في ECLIPSE AI</h1>
-        <p>مساعدك الذكي للإبداع والبرمجة والتعلم والإجابة عن أسئلتك.</p>
-        <div class="suggestions">
-          <button class="suggestion" onclick="useSuggestion('اشرح لي الذكاء الاصطناعي بطريقة بسيطة')">✦ اشرح لي الذكاء الاصطناعي</button>
-          <button class="suggestion" onclick="useSuggestion('ساعدني في برمجة موقع ويب')">⌘ ساعدني في البرمجة</button>
-          <button class="suggestion" onclick="useSuggestion('اقترح أفكار مشاريع تقنية جديدة')">◈ أفكار مشاريع جديدة</button>
-          <button class="suggestion" onclick="useSuggestion('علمني أساسيات الأمن السيبراني')">⌕ تعلم الأمن السيبراني</button>
-        </div>
-      </div>
-    </div>
-    <div class="messages" id="messages"></div>
-  </section>
-
-  <div class="composer-wrap">
-    <div class="composer">
-      <div class="input-box">
-        <textarea id="prompt" placeholder="اكتب رسالتك إلى ECLIPSE AI..." rows="1"></textarea>
-        <button class="send" id="send" onclick="sendMessage()">➤</button>
-      </div>
-      <div class="composer-note">ECLIPSE AI قد يقدم إجابات غير دقيقة. تحقق من المعلومات المهمة.</div>
-    </div>
+<section class="page active" id="home">
+ <div class="hero">
+  <small style="color:var(--cyan)">ADVANCED CYBERSECURITY AI</small>
+  <h2>تعلّم الأمن السيبراني. افهم التهديدات. ابنِ دفاعات أقوى.</h2>
+  <p>منصة تعليمية متقدمة للطلاب والباحثين في الأمن السيبراني والاختبار الأخلاقي وتحليل البرمجيات والحماية الرقمية.</p>
+  <div class="tags">
+   <span class="tag">ETHICAL HACKING</span>
+   <span class="tag">MALWARE ANALYSIS</span>
+   <span class="tag">DIGITAL FORENSICS</span>
+   <span class="tag">NETWORK SECURITY</span>
+   <span class="tag">CTF LABS</span>
   </div>
+  <button class="action" onclick="page('chat')">ابدأ المحادثة</button>
+ </div>
+ <h2>المجالات الرئيسية</h2>
+ <div class="grid">
+  <div class="card"><h3>Ethical Hacking</h3><p>تعليم اختبار الاختراق الأخلاقي ضمن الأنظمة المصرح بها.</p></div>
+  <div class="card"><h3>Malware Analysis</h3><p>تحليل البرمجيات المشبوهة وفهم سلوكها وطرق اكتشافها.</p></div>
+  <div class="card"><h3>Secure Coding</h3><p>كتابة الأكواد الآمنة واكتشاف الأخطاء البرمجية.</p></div>
+  <div class="card"><h3>Digital Forensics</h3><p>التحقيق الرقمي وتحليل السجلات والأدلة.</p></div>
+  <div class="card"><h3>CTF Academy</h3><p>تحديات تعليمية وتدريبات عملية.</p></div>
+  <div class="card"><h3>Network Defense</h3><p>مراقبة الشبكات وتحليل الأنشطة المشبوهة.</p></div>
+ </div>
+ <div class="notice">استخدم هذه المنصة للتعلم والاختبار على الأنظمة التي تملكها أو لديك تصريح باختبارها فقط.</div>
+</section>
+
+<section class="page" id="chat">
+ <h2>المساعد الأمني الذكي</h2>
+ <p>اسأل عن البرمجة الأمنية، تحليل الأكواد، الشبكات، الثغرات، والدفاع الرقمي.</p>
+ <div class="chat">
+  <div id="messages">
+   <div class="msg ai">أهلاً بك في ECLIPSE AI. كيف أساعدك في الأمن السيبراني؟</div>
+  </div>
+  <div class="composer">
+   <textarea id="prompt" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+   <button class="action" id="send" onclick="sendMessage()">إرسال</button>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="labs">
+ <h2>المختبرات التعليمية</h2>
+ <div class="card">
+  <h3>المختبر 01: تخزين كلمات المرور</h3>
+  <p>ما الطريقة الأفضل لتخزين كلمات المرور في تطبيق جامعي؟</p>
+  <label class="option"><input type="radio" name="q1" value="a"> تخزينها كنص واضح</label>
+  <label class="option"><input type="radio" name="q1" value="b"> استخدام Argon2id أو bcrypt مع salt فريد</label>
+  <label class="option"><input type="radio" name="q1" value="c"> وضع كلمة المرور داخل كود الواجهة</label>
+  <button class="action" onclick="quiz()">تحقق من الإجابة</button>
+  <div class="output" id="quizResult"></div>
+ </div>
+ <div class="card">
+  <h3>المختبر 02: أقل صلاحية</h3>
+  <p>موظف يحتاج قراءة التقارير فقط. ما الصلاحية المناسبة؟</p>
+  <p>الإجابة الصحيحة: منحه صلاحية قراءة التقارير فقط دون صلاحيات إدارية إضافية.</p>
+ </div>
+</section>
+
+<section class="page" id="tools">
+ <h2>أدوات الأمن السيبراني</h2>
+ <div class="grid">
+  <div class="tool">
+   <h3>SHA-256</h3>
+   <p>حساب بصمة نص تجريبي.</p>
+   <textarea id="hashInput" placeholder="اكتب النص"></textarea>
+   <button class="action" onclick="hashText()">احسب</button>
+   <div class="output" id="hashOutput"></div>
+  </div>
+  <div class="tool">
+   <h3>Base64</h3>
+   <p>ترميز وفك ترميز النصوص، وليس تشفيراً.</p>
+   <textarea id="baseInput" placeholder="النص"></textarea>
+   <button class="secondary" onclick="baseEncode()">Encode</button>
+   <button class="secondary" onclick="baseDecode()">Decode</button>
+   <div class="output" id="baseOutput"></div>
+  </div>
+  <div class="tool">
+   <h3>URL Encoder</h3>
+   <textarea id="urlInput" placeholder="النص"></textarea>
+   <button class="secondary" onclick="urlEncode()">Encode</button>
+   <button class="secondary" onclick="urlDecode()">Decode</button>
+   <div class="output" id="urlOutput"></div>
+  </div>
+  <div class="tool">
+   <h3>JWT Inspector</h3>
+   <p>يعرض بيانات JWT دون التحقق من التوقيع.</p>
+   <textarea id="jwtInput" placeholder="ضع JWT تجريبي هنا"></textarea>
+   <button class="action" onclick="inspectJWT()">تحليل</button>
+   <div class="output" id="jwtOutput"></div>
+  </div>
+ </div>
+ <div class="notice">استخدم بيانات تجريبية فقط. لا تضع مفاتيح API أو كلمات مرور أو رموز جلسات حقيقية.</div>
+</section>
+
+<section class="page" id="learn">
+ <h2>المعرفة والمفاهيم</h2>
+ <div class="grid">
+  <div class="card"><h3>OWASP Top 10</h3><p>أهم مخاطر تطبيقات الويب وطرق الوقاية منها.</p></div>
+  <div class="card"><h3>Linux & CLI</h3><p>إدارة الملفات والصلاحيات والعمليات والسجلات.</p></div>
+  <div class="card"><h3>TCP/IP & DNS</h3><p>البروتوكولات والمنافذ وتحليل حركة الشبكة.</p></div>
+  <div class="card"><h3>Cryptography</h3><p>التشفير والتجزئة والتوقيعات الرقمية.</p></div>
+  <div class="card"><h3>Incident Response</h3><p>اكتشاف الحوادث واحتواؤها ومعالجتها.</p></div>
+  <div class="card"><h3>Secure SDLC</h3><p>إدخال الأمن في مراحل تطوير البرمجيات.</p></div>
+ </div>
+</section>
+
+<section class="page" id="settings">
+ <h2>إعدادات الذكاء الاصطناعي</h2>
+ <div class="card">
+  <div class="notice">هذه نسخة تجريبية بواجهة أمامية فقط. المفتاح المخزن في المتصفح يمكن كشفه. لا تستخدم مفتاحاً مشتركاً على موقع عام. للنشر الحقيقي نحتاج Backend لحماية المفتاح.</div>
+  <div class="field">
+   <label>Gemini API Key</label>
+   <input type="password" id="apiKey" placeholder="ضع مفتاح Gemini هنا">
+  </div>
+  <div class="field">
+   <label>Model ID</label>
+   <input id="model" value="gemini-3.8-flash">
+  </div>
+  <button class="action" onclick="saveSettings()">حفظ الإعدادات</button>
+  <button class="secondary" onclick="testConnection()">اختبار الاتصال</button>
+  <div class="output" id="status"></div>
+ </div>
+</section>
+
+<footer>ECLIPSE AI • CYBERSECURITY ACADEMY</footer>
 </main>
 </div>
 
-<!-- SETTINGS -->
-<div class="overlay" id="settings">
-  <div class="modal">
-    <h2>⚙ إعدادات ECLIPSE AI</h2>
-    <p>اربط مزود الذكاء الاصطناعي واحفظ إعداداتك.</p>
-
-    <div class="field">
-      <label>مزود الذكاء الاصطناعي</label>
-      <select id="providerSelect">
-        <option value="gemini">Google Gemini</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Gemini API Key</label>
-      <input id="apiKey" type="password" placeholder="أدخل مفتاح API الخاص بك">
-    </div>
-
-    <div class="field">
-      <label>Model ID</label>
-      <input id="model" value="gemini-2.5-flash" placeholder="gemini-2.5-flash">
-    </div>
-
-    <div class="field">
-      <label>اسمك</label>
-      <input id="username" placeholder="Haider">
-    </div>
-
-    <div class="field">
-      <label>لغة الواجهة</label>
-      <select id="language">
-        <option value="ar">العربية</option>
-        <option value="en">English</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>تعليمات المساعد</label>
-      <input id="instructions" placeholder="مثلاً: أجب بالعربية وباختصار">
-    </div>
-
-    <div class="notice">
-      يتم حفظ المفتاح محلياً في متصفحك حتى لا يختفي عند إغلاق الصفحة.
-      لا تشارك جهازك أو بيانات المتصفح مع الآخرين. لا تستخدم هذا الأسلوب
-      لحفظ مفتاح في موقع عام.
-    </div>
-
-    <div class="modal-actions">
-      <button class="primary" onclick="saveSettings()">حفظ الإعدادات</button>
-      <button class="secondary" onclick="closeSettings()">إغلاق</button>
-    </div>
-  </div>
-</div>
-
 <script>
-const STORAGE = {
-  settings: "eclipse_ai_settings_v1",
-  chats: "eclipse_ai_chats_v1",
-  current: "eclipse_ai_current_v1"
-};
+const $=id=>document.getElementById(id);
+let history=[];
+let english=false;
 
-const defaults = {
-  provider: "gemini",
-  apiKey: "",
-  model: "gemini-2.5-flash",
-  username: "Haider",
-  language: "ar",
-  instructions: "أجب بطريقة واضحة ومفيدة."
-};
-
-let settings = load(STORAGE.settings, defaults);
-let chats = load(STORAGE.chats, []);
-let currentId = localStorage.getItem(STORAGE.current) || null;
-let busy = false;
-
-function load(key, fallback) {
-  try {
-    const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
+function page(name,button){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ $(name).classList.add('active');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ if(button)button.classList.add('active');
 }
 
-function persist() {
-  try {
-    localStorage.setItem(STORAGE.settings, JSON.stringify(settings));
-    localStorage.setItem(STORAGE.chats, JSON.stringify(chats));
-    if(currentId) localStorage.setItem(STORAGE.current, currentId);
-  } catch(error) {
-    alert("مساحة التخزين ممتلئة. احذف بعض المحادثات.");
-  }
+function toggleLanguage(){
+ english=!english;
+ document.documentElement.lang=english?'en':'ar';
+ document.documentElement.dir=english?'ltr':'rtl';
+ alert(english?'The interface language direction changed. Some content remains Arabic in this prototype.':'تمت إعادة اتجاه الواجهة للعربية.');
 }
 
-function getCurrent() {
-  return chats.find(c => c.id === currentId);
+function saveSettings(){
+ localStorage.setItem('eclipse_key',$('apiKey').value.trim());
+ localStorage.setItem('eclipse_model',$('model').value.trim()||'gemini-3.8-flash');
+ $('status').textContent='تم حفظ الإعدادات في هذا المتصفح.';
 }
 
-function newChat() {
-  const chat = {
-    id: Date.now().toString(),
-    title: "محادثة جديدة",
-    messages: []
-  };
-  chats.unshift(chat);
-  currentId = chat.id;
-  persist();
-  render();
-  document.getElementById("prompt").focus();
-  document.getElementById("sidebar").classList.remove("open");
+function addMessage(text,type){
+ const el=document.createElement('div');
+ el.className='msg '+type;
+ el.textContent=text;
+ $('messages').appendChild(el);
+ $('messages').scrollTop=$('messages').scrollHeight;
 }
 
-function ensureChat() {
-  if(!getCurrent()) newChat();
-}
+const systemPrompt=`You are ECLIPSE AI, an advanced bilingual cybersecurity academic assistant for university students. Teach advanced cybersecurity clearly. Focus on ethical hacking in authorized labs, secure coding, defensive security, malware analysis for detection, digital forensics, network defense, incident response, cryptography, and CTF education. Ask for scope and authorization when real systems are involved. Do not provide operational instructions or code for unauthorized access, credential theft, destructive malware, ransomware deployment, persistence, evasion, or attacks on real targets. For malware topics, provide safe analysis, indicators of compromise, detection logic, sandboxing concepts, and harmless simulations. Prefer defensive examples and mitigations. Never claim code was executed. Never request secrets, passwords, API keys, or real tokens. Respond in the language used by the student.`;
 
-function render() {
-  renderHistory();
-  const chat = getCurrent();
-  const messages = document.getElementById("messages");
-  const welcome = document.getElementById("welcome");
-
-  messages.innerHTML = "";
-  const list = chat ? chat.messages : [];
-  welcome.style.display = list.length ? "none" : "flex";
-
-  list.forEach((m, index) => {
-    const row = document.createElement("div");
-    row.className = "message " + (m.role === "user" ? "user" : "assistant");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.textContent = m.role === "user" ? "H" : "✦";
-
-    const body = document.createElement("div");
-    body.className = "bubble";
-
-    const label = document.createElement("div");
-    label.className = "message-label";
-    label.textContent = m.role === "user" ? "أنت" : "ECLIPSE AI";
-
-    const content = document.createElement("div");
-    content.className = "message-content";
-    content.textContent = m.text;
-
-    body.append(label, content);
-
-    if(m.role === "assistant") {
-      const actions = document.createElement("div");
-      actions.className = "message-actions";
-      const copy = document.createElement("button");
-      copy.className = "copy-btn";
-      copy.textContent = "نسخ الإجابة";
-      copy.onclick = () => copyText(m.text);
-      actions.append(copy);
-      body.append(actions);
-    }
-
-    row.append(avatar, body);
-    messages.append(row);
+async function sendMessage(){
+ const q=$('prompt').value.trim();
+ if(!q)return;
+ const key=localStorage.getItem('eclipse_key');
+ const model=localStorage.getItem('eclipse_model')||'gemini-3.8-flash';
+ if(!key){addMessage('أضف مفتاح Gemini API من الإعدادات أولاً.','ai');page('settings');return}
+ $('prompt').value='';
+ addMessage(q,'user');
+ $('send').disabled=true;
+ $('send').textContent='...';
+ try{
+  const contents=[...history,{role:'user',parts:[{text:q}]}];
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+  const response=await fetch(url,{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    systemInstruction:{parts:[{text:systemPrompt}]},
+    contents,
+    generationConfig:{maxOutputTokens:4096}
+   })
   });
-
-  messages.scrollTop = messages.scrollHeight;
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error?.message||'API error');
+  const answer=data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('\n')||'لم يصل رد نصي.';
+  history.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:answer}]});
+  if(history.length>20)history=history.slice(-20);
+  addMessage(answer,'ai');
+ }catch(error){
+  addMessage('حدث خطأ: '+error.message,'ai');
+ }finally{
+  $('send').disabled=false;
+  $('send').textContent='إرسال';
+ }
 }
 
-function renderHistory() {
-  const el = document.getElementById("history");
-  el.innerHTML = "";
-
-  chats.forEach(chat => {
-    const btn = document.createElement("button");
-    btn.className = "history-item" + (chat.id === currentId ? " active" : "");
-    btn.textContent = chat.title || "محادثة جديدة";
-    btn.onclick = () => {
-      currentId = chat.id;
-      persist();
-      render();
-      document.getElementById("sidebar").classList.remove("open");
-    };
-    el.append(btn);
+async function testConnection(){
+ saveSettings();
+ const key=localStorage.getItem('eclipse_key');
+ const model=localStorage.getItem('eclipse_model');
+ if(!key){$('status').textContent='أدخل مفتاح API أولاً.';return}
+ $('status').textContent='جارٍ اختبار الاتصال...';
+ try{
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`,{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({contents:[{role:'user',parts:[{text:'Reply OK'}]}],generationConfig:{maxOutputTokens:20}})
   });
+  const d=await r.json();
+  if(!r.ok)throw Error(d.error?.message||'API error');
+  $('status').textContent='الاتصال ناجح.';
+ }catch(e){$('status').textContent='فشل الاتصال: '+e.message}
 }
 
-function openSettings() {
-  document.getElementById("apiKey").value = settings.apiKey || "";
-  document.getElementById("model").value = settings.model || defaults.model;
-  document.getElementById("username").value = settings.username || "";
-  document.getElementById("language").value = settings.language || "ar";
-  document.getElementById("instructions").value = settings.instructions || "";
-  document.getElementById("providerSelect").value = settings.provider || "gemini";
-  document.getElementById("settings").classList.add("show");
+function quiz(){
+ const answer=document.querySelector('input[name="q1"]:checked');
+ $('quizResult').textContent=!answer?'اختر إجابة أولاً.':answer.value==='b'?'إجابة صحيحة!':'حاول مرة أخرى. استخدم خوارزمية تجزئة كلمات مرور مخصصة مثل Argon2id.';
 }
 
-function closeSettings() {
-  document.getElementById("settings").classList.remove("show");
+async function hashText(){
+ try{
+  const data=await crypto.subtle.digest('SHA-256',new TextEncoder().encode($('hashInput').value));
+  $('hashOutput').textContent=[...new Uint8Array(data)].map(x=>x.toString(16).padStart(2,'0')).join('');
+ }catch(e){$('hashOutput').textContent='تحتاج هذه الأداة إلى HTTPS أو localhost.'}
+}
+function baseEncode(){
+ try{$('baseOutput').textContent=btoa(unescape(encodeURIComponent($('baseInput').value)))}
+ catch(e){$('baseOutput').textContent='تعذر الترميز'}
+}
+function baseDecode(){
+ try{$('baseOutput').textContent=decodeURIComponent(escape(atob($('baseInput').value.trim())))}
+ catch(e){$('baseOutput').textContent='Base64 غير صالح'}
+}
+function urlEncode(){$('urlOutput').textContent=encodeURIComponent($('urlInput').value)}
+function urlDecode(){
+ try{$('urlOutput').textContent=decodeURIComponent($('urlInput').value)}
+ catch(e){$('urlOutput').textContent='النص غير صالح'}
+}
+function inspectJWT(){
+ try{
+  const parts=$('jwtInput').value.trim().split('.');
+  if(parts.length!==3)throw Error('JWT يحتاج ثلاثة أجزاء');
+  const decode=s=>JSON.stringify(JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))))),null,2);
+  $('jwtOutput').textContent='HEADER:\n'+decode(parts[0])+'\n\nPAYLOAD:\n'+decode(parts[1])+'\n\nالتوقيع لم يتم التحقق منه.';
+ }catch(e){$('jwtOutput').textContent='تعذر التحليل: '+e.message}
 }
 
-function saveSettings() {
-  settings = {
-    provider: document.getElementById("providerSelect").value,
-    apiKey: document.getElementById("apiKey").value.trim(),
-    model: document.getElementById("model").value.trim() || defaults.model,
-    username: document.getElementById("username").value.trim() || "Haider",
-    language: document.getElementById("language").value,
-    instructions: document.getElementById("instructions").value.trim()
-  };
-
-  persist();
-  updateStatus();
-  closeSettings();
-  alert("تم حفظ الإعدادات على هذا المتصفح بنجاح.");
-}
-
-function updateStatus() {
-  const connected = !!settings.apiKey;
-  document.getElementById("providerName").textContent =
-    connected ? "Google Gemini" : "لا يوجد مزود";
-  const status = document.getElementById("status");
-  status.textContent = connected ? "● المفتاح محفوظ" : "● غير متصل";
-  status.className = "status " + (connected ? "online" : "");
-}
-
-function useSuggestion(text) {
-  document.getElementById("prompt").value = text;
-  sendMessage();
-}
-
-function copyText(text) {
-  if(navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text)
-      .then(() => alert("تم النسخ"))
-      .catch(() => fallbackCopy(text));
-  } else fallbackCopy(text);
-}
-
-function fallbackCopy(text) {
-  const area = document.createElement("textarea");
-  area.value = text;
-  document.body.append(area);
-  area.select();
-  document.execCommand("copy");
-  area.remove();
-  alert("تم النسخ");
-}
-
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("open");
-}
-
-async function sendMessage() {
-  if(busy) return;
-
-  const input = document.getElementById("prompt");
-  const text = input.value.trim();
-  if(!text) return;
-
-  if(!settings.apiKey) {
-    alert("أولاً أضف Gemini API Key من الإعدادات.");
-    openSettings();
-    return;
-  }
-
-  ensureChat();
-  const chat = getCurrent();
-
-  chat.messages.push({role:"user", text});
-  if(chat.messages.length === 1) {
-    chat.title = text.slice(0, 35);
-  }
-
-  input.value = "";
-  input.style.height = "40px";
-  persist();
-  render();
-
-  busy = true;
-  document.getElementById("send").disabled = true;
-
-  const messages = document.getElementById("messages");
-  const typing = document.createElement("div");
-  typing.className = "typing";
-  typing.textContent = "ECLIPSE AI يفكر...";
-  messages.append(typing);
-  messages.scrollTop = messages.scrollHeight;
-
-  try {
-    const contents = chat.messages.map(m => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{text:m.text}]
-    }));
-
-    const systemText = [
-      settings.instructions,
-      "اسم المستخدم: " + settings.username,
-      "أجب بلغة " + (settings.language === "ar" ? "العربية" : "English")
-    ].filter(Boolean).join("\n");
-
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
-      encodeURIComponent(settings.model) +
-      ":generateContent?key=" + encodeURIComponent(settings.apiKey),
-      {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          systemInstruction:{parts:[{text:systemText}]},
-          contents:contents,
-          generationConfig:{
-            temperature:0.7,
-            maxOutputTokens:4096
-          }
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if(!response.ok) {
-      const message = data.error?.message || "حدث خطأ أثناء الاتصال.";
-      throw new Error(message);
-    }
-
-    const answer = data.candidates?.[0]?.content?.parts
-      ?.map(p => p.text || "").join("\n").trim();
-
-    if(!answer) throw new Error("لم يرجع النموذج إجابة. حاول مرة أخرى.");
-
-    chat.messages.push({role:"assistant", text:answer});
-    persist();
-
-  } catch(error) {
-    chat.messages.push({
-      role:"assistant",
-      text:"حدث خطأ: " + error.message +
-      "\n\nتأكد من صحة API Key واسم النموذج واتصال الإنترنت."
-    });
-    persist();
-  } finally {
-    busy = false;
-    document.getElementById("send").disabled = false;
-    render();
-  }
-}
-
-function clearAll() {
-  if(!confirm("هل تريد حذف جميع المحادثات؟ لا يمكن التراجع عن ذلك.")) return;
-  chats = [];
-  currentId = null;
-  localStorage.removeItem(STORAGE.chats);
-  localStorage.removeItem(STORAGE.current);
-  newChat();
-}
-
-document.getElementById("prompt").addEventListener("keydown", e => {
-  if(e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-document.getElementById("prompt").addEventListener("input", e => {
-  e.target.style.height = "40px";
-  e.target.style.height = Math.min(e.target.scrollHeight,150) + "px";
-});
-
-document.getElementById("settings").addEventListener("click", e => {
-  if(e.target.id === "settings") closeSettings();
-});
-
-if(!currentId || !getCurrent()) newChat();
-render();
-updateStatus();
+$('apiKey').value=localStorage.getItem('eclipse_key')||'';
+$('model').value=localStorage.getItem('eclipse_model')||'gemini-3.8-flash';
 </script>
 </body>
 </html>
