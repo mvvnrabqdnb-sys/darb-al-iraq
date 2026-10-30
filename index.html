@@ -1,933 +1,267 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>درب العراق | Darb Al-Iraq Navigation</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ECLIPSE AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#08111f;color:#fff;font-family:Tajawal,Arial,sans-serif;overflow:hidden}
-#map{position:absolute;inset:0;direction:ltr}
-.maplibregl-ctrl-bottom-left{margin-bottom:140px}
-body.navigating .maplibregl-ctrl-bottom-left{display:none}
-
-.panel{position:absolute;z-index:5;background:rgba(12,23,43,.95);
-border:1px solid #35466b;border-radius:18px;box-shadow:0 8px 30px #0005}
-.top{top:12px;left:12px;right:12px;padding:12px}
-.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.brand h2{margin:0;font-size:23px;color:#8ba7ff}
-.brand small{color:#b5c3dc}
-.search{display:flex;gap:8px}
-input{min-width:0;flex:1;background:#101d34;color:white;border:1px solid #34486e;
-border-radius:12px;padding:13px;font:inherit;outline:none}
-button{border:0;border-radius:12px;padding:11px 14px;background:#526ff5;color:white;
-font:inherit;font-weight:700;cursor:pointer}
-button:active{transform:scale(.97)}
-button.ghost{background:#1c2c4d;border:1px solid #3a4d78}
-button.danger{background:#e04b5a}
-.results{display:none;margin-top:8px;max-height:260px;overflow:auto}
-.result{padding:10px 8px;border-bottom:1px solid #30405c;cursor:pointer;display:flex;gap:10px;align-items:center}
-.result:hover{background:#243657}
-.result .rt{flex:1;min-width:0}
-.result .rn{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.result .ra{font-size:12px;color:#aebfe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.result .rd{font-size:12px;background:#243a66;border-radius:10px;padding:4px 8px;white-space:nowrap;color:#cfe0ff}
-#message{font-size:13px;color:#ffda88;margin-top:8px;min-height:0}
-#message:empty{display:none}
-
-.actions{position:absolute;z-index:5;right:12px;top:40%;display:flex;flex-direction:column;gap:10px}
-.actions button{width:48px;height:48px;padding:0;font-size:20px;box-shadow:0 4px 14px #0006}
-.actions .report{background:#ff7a3d}
-
-.bottom{bottom:12px;left:12px;right:12px;padding:14px}
-.status{color:#aebfe0;font-size:13px;margin-top:6px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.btns{display:flex;flex-direction:column;gap:6px}
-.footer{font-size:12px;color:#c0cce2;text-align:center;margin-top:10px}
-.footer a{color:#9bb1ff;text-decoration:none}
-
-/* navigation mode */
-.only-nav{display:none}
-body.navigating .only-nav{display:flex}
-body.navigating .not-nav{display:none !important}
-.navbanner{top:12px;left:12px;right:12px;padding:12px 16px;align-items:center;gap:14px;background:#1a6b3c;border-color:#2fa162}
-#navArrow{font-size:42px;line-height:1;min-width:48px;text-align:center}
-#navDist{font-size:26px;font-weight:800}
-#navText{font-size:15px;opacity:.95}
-.speedbox{position:absolute;z-index:5;left:12px;bottom:112px;flex-direction:column;gap:10px;align-items:center}
-.limit{width:56px;height:56px;border-radius:50%;background:#fff;color:#111;border:5px solid #e03a3a;
-display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
-.limit.none{opacity:.45;font-size:14px}
-.speed{width:66px;height:66px;border-radius:50%;background:rgba(12,23,43,.95);border:3px solid #6587ff;
-display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
-.speed b{font-size:24px}
-.speed small{font-size:10px;color:#aebfe0;margin-top:2px}
-.speed.over{border-color:#ff4d4d;background:#5a1620}
-.navbar{bottom:12px;left:12px;right:12px;padding:12px 14px;align-items:center;justify-content:space-between;gap:8px}
-.stat{text-align:center;flex:1}
-.stat b{display:block;font-size:20px}
-.stat span{font-size:11px;color:#aebfe0}
-.navbar button{padding:10px 14px}
-
-.alert{left:12px;right:12px;top:100px;padding:12px;display:none;align-items:center;gap:10px;background:#4a2b0f;border-color:#ff9a4d;z-index:8}
-.alert.show{display:flex}
-.alert .ai{font-size:30px}
-.alert .at{flex:1;font-weight:700}
-.alert button{padding:8px 10px;font-size:13px}
-
-.sheet{left:12px;right:12px;bottom:12px;padding:14px;display:none;z-index:9}
-.sheet.show{display:block}
-.sheet h3{margin:0 0 10px;font-size:17px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.grid button{background:#1c2c4d;border:1px solid #3a4d78;padding:14px 6px;font-size:14px;display:flex;flex-direction:column;gap:6px;align-items:center}
-.grid button span{font-size:28px}
-
-.hz{font-size:24px;line-height:1;filter:drop-shadow(0 2px 3px #000a);cursor:pointer}
-.me{width:24px;height:24px;border-radius:50%;background:#38e8ad;border:3px solid #fff;box-shadow:0 0 0 7px #38e8ad44;position:relative}
-.me::after{content:'';position:absolute;top:-13px;left:50%;transform:translateX(-50%);
-border:7px solid transparent;border-bottom:11px solid #fff;border-top:0}
-.pop{direction:rtl;font-family:Tajawal,Arial,sans-serif;color:#111;min-width:170px}
-.pop b{font-size:15px}
-.pop .pm{font-size:12px;color:#555;margin:4px 0 8px}
-.pop .pb{display:flex;gap:6px}
-.pop button{flex:1;padding:8px 6px;font-size:13px}
-.maplibregl-popup-content{padding:12px 14px}
-
-@media(min-width:700px){
- .top,.navbanner{left:20px;right:auto;width:430px}
- .bottom,.navbar{left:20px;right:auto;width:430px}
- .alert{left:20px;right:auto;width:430px}
- .sheet{left:20px;right:auto;width:430px}
- .actions{right:22px}
-}
-</style>
-</head>
-
+:root{--bg:#06070d;--bg2:#0b1020;--gl:rgba(18,24,50,.66);--bd:rgba(130,150,255,.16);--tx:#e8ecf8;--mu:#8b94b8;--b:#4f8cff;--v:#8b5cf6;--g:linear-gradient(135deg,#4f8cff,#8b5cf6);--cb:#0a0e1c}
+[data-theme=light]{--bg:#f1f3fb;--bg2:#fff;--gl:rgba(255,255,255,.78);--bd:rgba(60,70,140,.18);--tx:#161a30;--mu:#5d6585;--cb:#f6f7fd}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.65 'Sora','IBM Plex Sans Arabic',system-ui,sans-serif;background:radial-gradient(900px 500px at 70% -10%,rgba(139,92,246,.2),transparent),radial-gradient(700px 400px at 0 100%,rgba(79,140,255,.15),transparent),var(--bg);color:var(--tx);height:100dvh;display:flex;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+aside{width:280px;flex:none;display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--gl);backdrop-filter:blur(18px);border-inline-end:1px solid var(--bd);transition:margin .25s;z-index:20}
+aside.hide{margin-inline-start:-280px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.14em}
+.brand svg{width:28px;height:28px}
+.btn{padding:9px 14px;border-radius:12px;border:1px solid var(--bd);background:rgba(120,140,255,.08);transition:.15s}
+.btn:hover{background:rgba(120,140,255,.18)}
+.pri{background:var(--g);border:0;color:#fff;font-weight:600}
+.pri:hover{filter:brightness(1.1);background:var(--g)}
+input,select,textarea{background:rgba(120,140,255,.07);border:1px solid var(--bd);border-radius:10px;padding:8px 11px;width:100%}
+select option{background:var(--bg2)}
+nav{display:grid;gap:2px}
+nav button,.ci{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;text-align:start;color:var(--mu)}
+nav button:hover,nav button.on,.ci:hover,.ci.on{background:rgba(120,140,255,.14);color:var(--tx)}
+#list{flex:1;overflow:auto;display:grid;align-content:start;gap:2px}
+.ci{cursor:pointer;font-size:13.5px}.ci .ct{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ci small{font-size:11px;opacity:.6}
+.ci button{display:none;padding:0 4px;color:var(--mu)}.ci:hover button{display:block}
+.me{display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.avt{width:32px;height:32px;border-radius:50%;background:var(--g);display:grid;place-items:center;font-weight:600;color:#fff;flex:none}
+main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--bd)}
+.top select{width:auto;max-width:60vw}
+.view{display:none;flex:1;min-height:0;flex-direction:column}.view.on{display:flex}
+#msgs{flex:1;overflow:auto;padding:20px 16px}
+.wrap{max-width:820px;margin:0 auto}
+.m{display:flex;gap:12px;margin-bottom:22px}
+.av{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;background:rgba(120,140,255,.18);font-size:13px;font-weight:600}
+.av svg{width:20px;height:20px}
+.mb{flex:1;min-width:0}.meta{font-size:12px;color:var(--mu);margin-bottom:2px}
+.m.u .body{background:rgba(79,140,255,.13);border:1px solid var(--bd);border-radius:14px;padding:8px 13px;display:inline-block;max-width:100%;overflow-wrap:anywhere}
+.body p{margin:.5em 0}.body ul,.body ol{padding-inline-start:1.4em;margin:.5em 0}.body h1,.body h2,.body h3{margin:.8em 0 .3em;font-size:1.1em}
+.body a{color:var(--b)}.body code{background:rgba(120,140,255,.16);padding:1px 5px;border-radius:5px;font-size:.9em}
+.code{border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin:.7em 0;background:var(--cb);direction:ltr;text-align:left}
+.ch{display:flex;justify-content:space-between;padding:5px 12px;font-size:12px;color:var(--mu);border-bottom:1px solid var(--bd)}
+.code pre{padding:12px;overflow:auto;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace}.code code{background:none;padding:0}
+.code i{font-style:normal}.c{color:#6b7599}.s{color:#7ee0a8}.k{color:#b392ff}.n{color:#ffb86b}
+.acts{display:flex;gap:4px;margin-top:4px;opacity:.55}.acts button{font-size:12px;padding:2px 8px;border-radius:8px;color:var(--mu)}.acts button:hover{background:rgba(120,140,255,.16);color:var(--tx)}
+.err{margin-top:6px;padding:8px 12px;border-radius:10px;background:rgba(255,80,100,.12);border:1px solid rgba(255,80,100,.4);font-size:13px}
+.err button{margin-inline-start:8px;text-decoration:underline}
+.dots{display:inline-flex;gap:4px;padding:8px 0}.dots i{width:7px;height:7px;border-radius:50%;background:var(--b);animation:bl 1.1s infinite}.dots i:nth-child(2){animation-delay:.18s}.dots i:nth-child(3){animation-delay:.36s}
+@keyframes bl{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1.1)}}
+.empty{text-align:center;padding:6vh 0 2vh}
+.eclipse{width:132px;height:132px;margin:0 auto 18px;position:relative}
+.eclipse:before{content:"";position:absolute;inset:-26px;border-radius:50%;background:conic-gradient(from 0deg,#4f8cff,#8b5cf6,#4f8cff);filter:blur(24px);opacity:.55;animation:sp 9s linear infinite}
+.eclipse:after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 2px rgba(180,190,255,.5),0 0 40px rgba(139,92,246,.6)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty h1{font-size:28px;font-weight:600}.empty p{color:var(--mu);margin:6px 0 20px}
+.sug{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;text-align:start}
+.sug button,.card{padding:14px;border-radius:14px;border:1px solid var(--bd);background:var(--gl);text-align:start;transition:.15s}
+.sug button:hover,.card:hover{border-color:var(--b);transform:translateY(-2px)}
+.setup{margin:0 auto 18px;max-width:560px;padding:14px;border-radius:14px;border:1px solid var(--v);background:rgba(139,92,246,.1);text-align:start;font-size:14px}
+.comp{padding:10px 16px 16px}
+.cbox{max-width:820px;margin:0 auto;display:flex;align-items:flex-end;gap:6px;padding:8px;border-radius:18px;background:var(--gl);backdrop-filter:blur(14px);border:1px solid var(--bd)}
+.cbox textarea{border:0;background:none;resize:none;max-height:200px;padding:8px}
+.ib{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--mu);flex:none}.ib:hover,.ib.on{background:rgba(120,140,255,.2);color:var(--tx)}
+.chips{max-width:820px;margin:0 auto 6px;display:flex;gap:6px;flex-wrap:wrap}.chips span{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--bd)}
+.pad{padding:20px;overflow:auto;flex:1}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;max-width:980px;margin:0 auto}
+.ws{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-height:0;padding:12px 16px}
+.ws textarea{height:100%;resize:none;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;direction:ltr;text-align:left;tab-size:2;white-space:pre}
+.ws iframe{width:100%;height:100%;border:1px solid var(--bd);border-radius:12px;background:#fff}
+.bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;align-items:center}.bar .on{background:var(--g);color:#fff}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:50;padding:12px}#modal.on{display:grid}
+.dlg{width:min(620px,100%);max-height:90dvh;overflow:auto;padding:20px;border-radius:18px;background:var(--bg2);border:1px solid var(--bd);display:grid;gap:10px}
+fieldset{border:1px solid var(--bd);border-radius:12px;padding:10px;display:grid;gap:6px}legend{padding:0 6px;font-size:13px;color:var(--mu)}
+label{font-size:13px;color:var(--mu)}.note{font-size:12.5px;color:var(--mu);padding:10px;border-radius:10px;background:rgba(255,184,107,.1);border:1px solid rgba(255,184,107,.35)}
+#ov{display:none}
+@media(max-width:820px){aside{position:fixed;inset-block:0;inset-inline-start:0}#ov.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:15}.ws{grid-template-columns:1fr;overflow:auto}.ws>*{min-height:300px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
 <body>
-<div id="map"></div>
-
-<!-- لوحة البحث -->
-<div class="panel top not-nav">
-  <div class="brand">
-    <div>
-      <h2>درب العراق <small>DARB AL-IRAQ</small></h2>
-      <small>ملاحتك بلمسة عراقية 🇮🇶</small>
-    </div>
-    <button onclick="toggle3D()" id="viewButton">3D</button>
+<aside id="side">
+ <div class="brand"><span id="logo1"></span>ECLIPSE</div>
+ <button class="btn pri" id="nc"></button>
+ <input id="q" type="search">
+ <nav id="nav"></nav>
+ <div id="list"></div>
+ <div class="me"><div class="avt" id="avt">U</div><span id="uname" style="flex:1"></span><button class="ib" id="setb" aria-label="Settings">⚙</button></div>
+</aside>
+<div id="ov"></div>
+<main>
+ <div class="top"><button class="ib" id="tg" aria-label="Menu">☰</button><select id="model"></select><span style="flex:1"></span><span id="tt" style="color:var(--mu);font-size:13px"></span></div>
+ <section class="view on" id="v-chat">
+  <div id="msgs"><div class="wrap" id="mw"></div></div>
+  <div class="comp"><div class="chips" id="chips"></div>
+   <div class="cbox"><button class="ib" id="att" aria-label="Attach">📎</button><button class="ib" id="web" aria-label="Web search">🌐</button>
+   <textarea id="in" rows="1"></textarea><button class="ib pri" id="go" aria-label="Send">➤</button></div>
+   <input type="file" id="file" multiple hidden accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.log">
   </div>
+ </section>
+ <section class="view" id="v-tools"><div class="pad"><div class="grid" id="tgrid"></div></div></section>
+ <section class="view" id="v-code">
+  <div class="bar" id="ctabs"></div>
+  <div class="ws"><textarea id="ed" spellcheck="false"></textarea><iframe id="pv" sandbox="allow-scripts" title="Preview"></iframe></div>
+  <div class="bar" id="cbar"></div>
+ </section>
+ <section class="view" id="v-img"><div class="pad"><div style="max-width:640px;margin:0 auto;display:grid;gap:10px">
+  <textarea id="ip" rows="3"></textarea>
+  <select id="isz"><option>1024x1024</option><option>1024x1536</option><option>1536x1024</option></select>
+  <button class="btn pri" id="ig"></button><div id="io" style="color:var(--mu)"></div></div></div></section>
+</main>
+<div id="modal"><div class="dlg" id="dlg"></div></div>
 
-  <div class="search">
-    <input id="searchInput" placeholder="ابحث عن مكان أو شارع..." autocomplete="off">
-    <button onclick="searchPlaces()">بحث</button>
-  </div>
-  <div id="results" class="results"></div>
-  <div id="message"></div>
-</div>
-
-<!-- شريط التعليمات أثناء الملاحة -->
-<div class="panel navbanner only-nav">
-  <div id="navArrow">⬆</div>
-  <div>
-    <div id="navDist">--</div>
-    <div id="navText">--</div>
-  </div>
-</div>
-
-<!-- تنبيه سيطرة / كاميرا / حفرة قدامك -->
-<div class="panel alert" id="alertBox">
-  <div class="ai" id="alertIcon">🚧</div>
-  <div class="at" id="alertText"></div>
-  <button id="alertYes">موجود ✔</button>
-  <button id="alertNo" class="danger">مو موجود ✖</button>
-</div>
-
-<!-- أزرار جانبية -->
-<div class="actions">
-  <button onclick="locateUser()" title="موقعي">◎</button>
-  <button onclick="tiltMap()" title="منظور ثلاثي الأبعاد">3D</button>
-  <button class="not-nav" onclick="resetMap()" title="بغداد">⌂</button>
-  <button class="report" onclick="openReport()" title="تبليغ">🚨</button>
-  <button id="muteBtn" class="ghost" onclick="toggleMute()" title="الصوت">🔊</button>
-</div>
-
-<!-- السرعة وحد السرعة -->
-<div class="speedbox only-nav">
-  <div class="limit none" id="limitBox">--</div>
-  <div class="speed" id="speedBox"><b id="speedVal">0</b><small>كم/س</small></div>
-</div>
-
-<!-- لوحة الوجهة -->
-<div class="panel bottom not-nav">
-  <div class="row">
-    <div style="min-width:0;flex:1">
-      <strong id="destinationTitle">درب العراق إلى وجهتك</strong>
-      <div class="status" id="routeInfo">ابحث عن مكان حتى تبدأ بتحديد وجهتك.</div>
-    </div>
-    <div class="btns">
-      <button id="mainBtn" onclick="mainAction()">عرض المسار</button>
-      <button class="ghost" onclick="simulateAction()" style="font-size:12px;padding:7px 10px">🎮 تجربة المسار</button>
-    </div>
-  </div>
-  <div class="footer">
-    تمت البرمجة بأيادٍ عراقية 🇮🇶<br>
-    المطوّر: <a href="https://www.instagram.com/uv_d0/" target="_blank" rel="noopener">@uv_d0</a>
-  </div>
-</div>
-
-<!-- شريط الملاحة السفلي -->
-<div class="panel navbar only-nav">
-  <div class="stat"><b id="etaClock">--</b><span>الوصول</span></div>
-  <div class="stat"><b id="etaMin">--</b><span>دقيقة</span></div>
-  <div class="stat"><b id="etaKm">--</b><span>كم</span></div>
-  <button class="danger" onclick="stopNavigation(true)">إنهاء</button>
-</div>
-
-<!-- نافذة التبليغ -->
-<div class="panel sheet" id="reportSheet">
-  <h3>شنو تريد تبلّغ عنه هنا؟</h3>
-  <div class="grid" id="reportGrid"></div>
-  <button class="ghost" style="width:100%;margin-top:10px" onclick="closeReport()">إلغاء</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
-const $ = id => document.getElementById(id);
-const message = text => $('message').textContent = text;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const LOGO='<svg viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><circle cx="16" cy="16" r="12" fill="#06070d" stroke="url(#lg)" stroke-width="3"/><circle cx="20" cy="13" r="9" fill="#06070d"/></svg>';
+const L={en:{new:'New chat',search:'Search chats…',chat:'Chat',tools:'AI tools',code:'Coding workspace',images:'Image generation',settings:'Settings',you:'You',retry:'Retry',copy:'Copy',copied:'Copied',edit:'Edit',regen:'Regenerate',ph:'Message Eclipse AI…',title:'What will you create today?',sub:'Ask, write, code, or analyze. Eclipse connects to the AI provider you configure.',nop:'No provider connected',newt:'New chat',setup:'To start chatting, open Settings, add an API key and model id for OpenAI, Anthropic, Gemini, or an OpenAI-compatible endpoint. Responses come only from the provider you connect.',save:'Save',cancel:'Cancel',run:'Run preview',dl:'Download',clr:'Clear',exp:'Explain with AI',dbg:'Debug with AI',pyn:'Python cannot run in the browser here; use AI explain/debug.',gen:'Generate image',iph:'Describe the image…',noimg:'Image generation needs an OpenAI-compatible key, base URL and an image model id (Settings).',nosearch:'Add a Tavily API key in Settings to enable web search.',sec:'API keys are held in memory only (never saved) and sent directly from your browser, so anyone with access to this page can see them. For production, route requests through a backend or secure API gateway.',name:'Your name',theme:'Theme',lang:'Language',fmt:'Response style',instr:'Custom assistant instructions',mem:'Memory (one note per line, sent with every chat)',imgm:'Image model id',exportb:'Export data',wipe:'Delete all conversations',close:'Close',del:'Delete this conversation?',ren:'Rename',sp:['Explain how transformers work','Write a Python script that renames files','Build a landing page for a coffee shop','Summarize this text in 5 bullets']},
+ar:{new:'محادثة جديدة',search:'ابحث في المحادثات…',chat:'المحادثة',tools:'أدوات الذكاء الاصطناعي',code:'مساحة البرمجة',images:'توليد الصور',settings:'الإعدادات',you:'أنت',retry:'إعادة المحاولة',copy:'نسخ',copied:'تم النسخ',edit:'تعديل',regen:'إعادة التوليد',ph:'اكتب رسالة إلى Eclipse AI…',title:'ماذا ستبدع اليوم؟',sub:'اسأل، اكتب، برمج، أو حلّل. يتصل Eclipse بمزوّد الذكاء الاصطناعي الذي تضبطه.',nop:'لا يوجد مزوّد متصل',newt:'محادثة جديدة',setup:'للبدء افتح الإعدادات وأضف مفتاح API ومعرّف النموذج لـ OpenAI أو Anthropic أو Gemini أو واجهة متوافقة مع OpenAI. الردود تأتي فقط من المزوّد الذي تربطه.',save:'حفظ',cancel:'إلغاء',run:'تشغيل المعاينة',dl:'تنزيل',clr:'مسح',exp:'شرح بالذكاء الاصطناعي',dbg:'تصحيح بالذكاء الاصطناعي',pyn:'لا يمكن تشغيل بايثون هنا في المتصفح؛ استخدم الشرح/التصحيح بالذكاء الاصطناعي.',gen:'توليد الصورة',iph:'صف الصورة…',noimg:'توليد الصور يحتاج مفتاحًا وعنوانًا ومعرّف نموذج صور متوافقًا مع OpenAI (الإعدادات).',nosearch:'أضف مفتاح Tavily في الإعدادات لتفعيل البحث في الويب.',sec:'مفاتيح API تُحفظ في الذاكرة فقط (لا تُخزَّن) وتُرسل مباشرة من متصفحك، لذا يمكن لأي شخص يصل إلى هذه الصفحة رؤيتها. للإنتاج استخدم خادمًا خلفيًا أو بوابة API آمنة.',name:'اسمك',theme:'المظهر',lang:'اللغة',fmt:'أسلوب الرد',instr:'تعليمات مخصصة للمساعد',mem:'الذاكرة (ملاحظة في كل سطر، تُرسل مع كل محادثة)',imgm:'معرّف نموذج الصور',exportb:'تصدير البيانات',wipe:'حذف كل المحادثات',close:'إغلاق',del:'حذف هذه المحادثة؟',ren:'إعادة التسمية',sp:['اشرح كيف تعمل المحوّلات (Transformers)','اكتب سكربت بايثون لإعادة تسمية الملفات','ابنِ صفحة هبوط لمقهى','لخّص هذا النص في 5 نقاط']}};
+const PV={openai:{n:'OpenAI',ph:'gpt-…'},anthropic:{n:'Anthropic Claude',ph:'claude-…'},gemini:{n:'Google Gemini',ph:'gemini-…'},custom:{n:'Custom (OpenAI-compatible)',ph:'model id'}};
+const TL=[['code','Coding assistant','مساعد البرمجة','You are an expert software engineer. Write correct, complete, commented code.','Help me with this code task: '],['explain','Code explanation','شرح الكود','Explain code clearly, step by step.','Explain this code:\n'],['site','Website generation','توليد المواقع','Generate complete responsive single-file websites (HTML, CSS, JS) in one code block.','Build a website: '],['web','HTML/CSS/JS help','مساعدة HTML/CSS/JS','You are a front-end specialist.','My front-end question: '],['py','Python assistance','مساعدة بايثون','You are a Python expert; write clear idiomatic code.','My Python question: '],['write','Text writing','كتابة النصوص','You are a skilled writer; match the requested tone and audience.','Write: '],['sum','Summarization','التلخيص','Summarize faithfully; key points first.','Summarize the following:\n'],['tr','Translation','الترجمة','Translate accurately, preserving tone and formatting.','Translate to English/Arabic:\n'],['brain','Brainstorming','العصف الذهني','Generate diverse concrete ideas, then rank the best.','Brainstorm ideas for: '],['doc','Document analysis','تحليل المستندات','Analyze attached documents and refer to the sections you rely on.','Analyze the attached document and: '],['data','Data analysis','تحليل البيانات','Analyze attached data by reasoning only (you cannot execute code here); show calculations and offer Python/SQL.','Analyze this data: ']];
+const LS='eclipse.v1',D={theme:'dark',lang:'en',fmt:'balanced',instr:'',mem:'',name:'',sel:'',web:false,imgModel:'',prov:{openai:{model:'',base:'https://api.openai.com/v1'},anthropic:{model:''},gemini:{model:''},custom:{model:'',base:''}},code:{html:'<h1>Hello Eclipse</h1>',css:'body{font-family:sans-serif;padding:2rem}',js:'console.log("ready")',py:'print("hello")'}};
+let S;try{S=JSON.parse(localStorage.getItem(LS))}catch(e){}S=S||{convs:[],cur:null};S.convs=S.convs||[];S.p={...D,...(S.p||{}),prov:{...D.prov,...((S.p||{}).prov||{})},code:{...D.code,...((S.p||{}).code||{})}};
+const K={};let pend=[],ac=null,busyF=false,tab='html',stick=true;
+const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S,(k,v)=>k==='data'?undefined:v))}catch(e){}};
+const t=k=>(L[S.p.lang]||L.en)[k]??L.en[k]??k;
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const escA=s=>esc(s).replace(/"/g,'&quot;');
+const fmtT=ts=>new Date(ts).toLocaleString(S.p.lang==='ar'?'ar':'en',{dateStyle:'short',timeStyle:'short'});
+const cur=()=>S.convs.find(c=>c.id===S.cur);
+const ready=id=>{const c=S.p.prov[id];return !!(c.model&&(id==='custom'?c.base:K[id]))};
+const curProv=()=>ready(S.p.sel)?S.p.sel:Object.keys(PV).find(ready);
 
-/* ---------- إصلاح الكتابة المعكوسة للعربي على الخريطة ---------- */
-try{
-  const p = maplibregl.setRTLTextPlugin(
-    'https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
-    true
-  );
-  if(p && p.catch) p.catch(e => console.log('RTL plugin failed:', e));
-}catch(e){ console.log('RTL plugin error:', e); }
+/* markdown + highlighting */
+function hl(code,l){const hash=/^(py|python|sh|bash|yaml|yml)$/i.test(l);return esc(code).replace(/(\/\/.*|\/\*[\s\S]*?\*\/|#.*)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|\b(function|const|let|var|return|if|else|elif|for|while|class|import|from|def|async|await|new|try|catch|except|None|True|False|in|of|true|false|null)\b|\b(\d+\.?\d*)\b/g,(m,c,s,k,n)=>c?(c[0]==='#'&&!hash?m:`<i class=c>${c}</i>`):s?`<i class=s>${s}</i>`:k?`<i class=k>${k}</i>`:`<i class=n>${n}</i>`)}
+function md(s){const B=[];s=s.replace(/```([\w+-]*)\n?([\s\S]*?)(```|$)/g,(m,l,c)=>{B.push(`<div class=code><div class=ch><span>${esc(l||'code')}</span><button data-copy>${t('copy')}</button></div><pre><code>${hl(c.replace(/\n$/,''),l)}</code></pre></div>`);return '\u0000'+(B.length-1)+'\u0000'});
+const inl=x=>esc(x).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])\*([^*\n]+)\*/g,'$1<em>$2</em>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+let out='',list='',para=[];const fp=()=>{if(para.length)out+='<p>'+para.join('<br>')+'</p>';para=[]},fl=()=>{if(list)out+='</'+list+'>';list=''};
+s.split('\n').forEach(ln=>{let m;if(m=ln.match(/^\u0000(\d+)\u0000$/)){fp();fl();out+=B[m[1]]}else if(m=ln.match(/^(#{1,3})\s+(.*)/)){fp();fl();out+=`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`}else if(m=ln.match(/^\s*([-*]|\d+\.)\s+(.*)/)){fp();const tg=/\d/.test(m[1])?'ol':'ul';if(list!==tg){fl();out+='<'+tg+'>';list=tg}out+='<li>'+inl(m[2])+'</li>'}else if(!ln.trim()){fp();fl()}else{fl();para.push(inl(ln))}});
+fp();fl();return out.replace(/\u0000(\d+)\u0000/g,(m,i)=>B[i])}
 
-const map = new maplibregl.Map({
-  container:'map',
-  style:'https://tiles.openfreemap.org/styles/liberty',
-  center:[44.3661,33.3152],
-  zoom:12,
-  pitch:55,
-  bearing:-15,
-  antialias:true
-});
-map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-left');
+/* provider calls */
+const ok=async r=>{if(!r.ok)throw Error(r.status+': '+(await r.text()).slice(0,400))};
+async function sse(res,cb){const r=res.body.getReader(),d=new TextDecoder();let b='';for(;;){const{done,value}=await r.read();if(done)break;b+=d.decode(value,{stream:true});let i;while((i=b.indexOf('\n'))>=0){const l=b.slice(0,i).trim();b=b.slice(i+1);if(!l.startsWith('data:'))continue;const x=l.slice(5).trim();if(!x||x==='[DONE]')continue;let j;try{j=JSON.parse(x)}catch(e){continue}cb(j)}}}
+function parts(p,m){const at=m.att||[];let txt=m.text||'(see attachment)';at.filter(a=>a.kind==='text').forEach(a=>txt+=`\n\n[File: ${a.name}]\n${a.data}`);const bin=at.filter(a=>a.kind!=='text'&&a.data);
+if(p==='gemini')return[{text:txt},...bin.map(a=>({inlineData:{mimeType:a.type,data:a.data}}))];
+if(p==='anthropic')return[...bin.map(a=>({type:a.kind==='img'?'image':'document',source:{type:'base64',media_type:a.type,data:a.data}})),{type:'text',text:txt}];
+if(bin.some(a=>a.kind==='pdf'))throw Error('PDF analysis needs Anthropic or Gemini. Choose one of those models.');
+return[{type:'text',text:txt},...bin.map(a=>({type:'image_url',image_url:{url:`data:${a.type};base64,${a.data}`}}))]}
+async function call(p,h,sys,sig,out){const c=S.p.prov[p],k=K[p];let r;const J={'content-type':'application/json'};
+if(p==='anthropic'){r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:sig,headers:{...J,'x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model,max_tokens:4096,system:sys,stream:true,messages:h.map(m=>({role:m.role,content:m.role==='user'?m.parts:m.text}))})});await ok(r);await sse(r,j=>{if(j.type==='content_block_delta'&&j.delta.text)out(j.delta.text);if(j.type==='error')throw Error(j.error.message)})}
+else if(p==='gemini'){r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(c.model)}:streamGenerateContent?alt=sse`,{method:'POST',signal:sig,headers:{...J,'x-goog-api-key':k},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:h.map(m=>({role:m.role==='user'?'user':'model',parts:m.role==='user'?m.parts:[{text:m.text}]}))})});await ok(r);await sse(r,j=>(j.candidates?.[0]?.content?.parts||[]).forEach(x=>x.text&&out(x.text)))}
+else{const hd={...J};if(k)hd.authorization='Bearer '+k;r=await fetch((c.base||'').replace(/\/$/,'')+'/chat/completions',{method:'POST',signal:sig,headers:hd,body:JSON.stringify({model:c.model,stream:true,messages:[{role:'system',content:sys},...h.map(m=>({role:m.role,content:m.role==='user'?m.parts:m.text}))]})});await ok(r);await sse(r,j=>{const d=j.choices?.[0]?.delta?.content;if(d)out(d);if(j.error)throw Error(j.error.message)})}}
+function system(c){let s='You are ECLIPSE AI, a capable assistant. Reply in the language the user writes in.';s+={concise:' Keep answers short.',detailed:' Give thorough, well-structured answers.',balanced:''}[S.p.fmt];if(S.p.instr)s+='\nUser instructions: '+S.p.instr;if(S.p.mem.trim())s+='\nNotes about the user:\n'+S.p.mem;const tl=TL.find(x=>x[0]===c.tool);if(tl)s+='\n'+tl[3];return s}
 
-/* ---------- خريطة احتياطية إذا فشل تحميل الخريطة الأساسية ---------- */
-const FALLBACK_STYLE={
-  version:8,
-  sources:{osm:{type:'raster',tileSize:256,maxzoom:19,
-    tiles:['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png','https://b.tile.openstreetmap.org/{z}/{x}/{y}.png','https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
-    attribution:'© OpenStreetMap'}},
-  layers:[{id:'osm',type:'raster',source:'osm'}]
-};
-let usedFallback=false, styleOK=false;
-function useFallback(why){
-  if(usedFallback) return;
-  usedFallback=true;
-  console.log('Falling back to OSM raster:',why);
-  try{ map.setStyle(FALLBACK_STYLE); }catch(e){}
-  const m=document.getElementById('message');
-  if(m) m.textContent='تم التحويل للخريطة الاحتياطية (بدون مباني 3D).';
-}
-map.on('style.load',()=>{ styleOK=true; });
-map.on('error',e=>{
-  const err=e&&e.error; const url=(err&&err.url)||'';
-  console.log('Map error:',err&&err.message);
-  if(!styleOK && !usedFallback) useFallback(err&&err.message);
-});
-setTimeout(()=>{ if(!styleOK) useFallback('timeout'); },8000);
-setTimeout(()=>{ try{ map.resize(); }catch(e){} },500);
+/* chat */
+function newChat(tool){const c={id:'c'+Date.now(),title:'',msgs:[],tool:tool||null,upd:Date.now()};S.convs.push(c);S.cur=c.id;save();renderList();renderMsgs();return c}
+function busy(f){busyF=f;$('#go').textContent=f?'■':'➤';$('#go').setAttribute('aria-label',f?'Stop':'Send')}
+async function gen(){const c=cur(),p=curProv();if(!p){openSettings();return}
+const a={role:'assistant',text:'',ts:Date.now(),model:PV[p].n+' · '+S.p.prov[p].model};c.msgs.push(a);busy(true);stick=true;renderMsgs();ac=new AbortController();
+try{let sys=system(c);
+if(S.p.web){if(!K.tavily)throw Error(t('nosearch'));const q=[...c.msgs].reverse().find(m=>m.role==='user').text;const r=await fetch('https://api.tavily.com/search',{method:'POST',signal:ac.signal,headers:{'content-type':'application/json',authorization:'Bearer '+K.tavily},body:JSON.stringify({query:q,max_results:5})});await ok(r);const j=await r.json();sys+='\nWeb search results (cite URLs when used):\n'+(j.results||[]).map(x=>`- ${x.title} (${x.url}): ${(x.content||'').slice(0,400)}`).join('\n')}
+const h=c.msgs.slice(0,-1).filter(m=>m.text||m.role==='user').map(m=>({role:m.role,text:m.text,parts:m.role==='user'?parts(p,m):null}));
+await call(p,h,sys,ac.signal,d=>{a.text+=d;upd(a)})}
+catch(e){if(e.name!=='AbortError')a.err=(e instanceof TypeError?'Network/CORS error: the provider may block direct browser calls or the URL is wrong. ':'')+(e.message||e)}
+busy(false);ac=null;if(!a.text&&!a.err)c.msgs.pop();c.upd=Date.now();save();renderMsgs();renderList()}
+function send(txt){const inp=$('#in');txt=(txt??inp.value).trim();if(busyF||(!txt&&!pend.length))return;if(!curProv()){openSettings();return}
+let c=cur()||newChat();c.msgs.push({role:'user',text:txt||'(attachment)',ts:Date.now(),att:pend.splice(0)});if(!c.title)c.title=(txt||'Attachment').slice(0,40);inp.value='';grow();chips();setView('chat');gen()}
+function msgHTML(m,i,last){const u=m.role==='user';const at=(m.att||[]).map(a=>`<span>📎 ${esc(a.name)}</span>`).join(' ');
+const body=u?esc(m.text).replace(/\n/g,'<br>')+(at?'<div style="font-size:12px;margin-top:4px">'+at+'</div>':''):(m.text?md(m.text):(m.err?'':'<span class=dots><i></i><i></i><i></i></span>'));
+return `<div class="m ${u?'u':'a'}" data-i="${i}"><div class=av>${u?esc((S.p.name||'U')[0].toUpperCase()):LOGO}</div><div class=mb><div class=meta>${u?t('you'):'Eclipse'} · ${fmtT(m.ts)}${m.model?' · '+esc(m.model):''}</div><div class=body>${body}</div>${m.err?`<div class=err>${esc(m.err)}<button data-act=retry>${t('retry')}</button></div>`:''}<div class=acts>${u?`<button data-act=edit>${t('edit')}</button>`:`<button data-act=copy>${t('copy')}</button>${last?`<button data-act=regen>${t('regen')}</button>`:''}`}</div></div></div>`}
+function renderMsgs(){const c=cur();const w=$('#mw');if(!c||!c.msgs.length){const np=!curProv();w.innerHTML=`<div class=empty><div class=eclipse></div><h1>${t('title')}</h1><p>${t('sub')}</p>${np?`<div class=setup>${t('setup')}</div>`:''}<div class=sug>${L[S.p.lang].sp.map(x=>`<button data-sug="${escA(x)}">${esc(x)}</button>`).join('')}</div></div>`;return}
+w.innerHTML=c.msgs.map((m,i)=>msgHTML(m,i,i===c.msgs.length-1)).join('');scroll()}
+function upd(a){const el=$('#mw .m.a:last-child .body');if(el)el.innerHTML=md(a.text);scroll()}
+function scroll(){const m=$('#msgs');if(stick)m.scrollTop=m.scrollHeight}
+$('#msgs').addEventListener('scroll',e=>{const m=e.target;stick=m.scrollHeight-m.scrollTop-m.clientHeight<80});
+$('#mw').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.sug){send(b.dataset.sug);return}
+if(b.hasAttribute('data-copy')){navigator.clipboard.writeText(b.closest('.code').querySelector('pre').innerText);b.textContent=t('copied');setTimeout(()=>b.textContent=t('copy'),1200);return}
+const c=cur(),el=b.closest('.m');if(!el||!b.dataset.act)return;const i=+el.dataset.i,m=c.msgs[i],a=b.dataset.act;
+if(a==='copy'){navigator.clipboard.writeText(m.text);b.textContent=t('copied')}
+if((a==='regen'||a==='retry')&&!busyF){c.msgs.splice(i);gen()}
+if(a==='edit'&&!busyF){const bd=el.querySelector('.body');bd.innerHTML=`<textarea rows=3>${esc(m.text)}</textarea><div class=acts style="opacity:1"><button data-act=save>${t('save')}</button><button data-act=cancel>${t('cancel')}</button></div>`}
+if(a==='cancel')renderMsgs();
+if(a==='save'){const v=el.querySelector('textarea').value.trim();if(!v)return;m.text=v;c.msgs.splice(i+1);save();gen()}});
 
-/* ---------- الحالة ---------- */
-let userPosition = null;
-let destination = null;
-let destinationMarker = null;
-let userMarker = null;
-let is3D = true;
-let routeReady = false;
-let R = null;               // بيانات المسار الحالي
-let navigating = false;
-let watchId = null;
-let simTimer = null;
-let wakeLock = null;
-let muted = false;
-let ann = {};               // التعليمات الصوتية اللي انقالت
-let alerted = new Set();    // تنبيهات الأخطار اللي انقالت بهاي الرحلة
-let offCount = 0;
-let rerouting = false;
-let lastReroute = 0;
-let lastFix = null;
-let curLimit = null;
-let lastLimitFetch = 0;
-let lastOverWarn = 0;
-let currentAlertReport = null;
-let alertTimer = null;
+/* attachments */
+function chips(){$('#chips').innerHTML=pend.map((a,i)=>`<span>${esc(a.name)} <button data-x="${i}">✕</button></span>`).join('')}
+$('#chips').onclick=e=>{const x=e.target.dataset.x;if(x!=null){pend.splice(+x,1);chips()}};
+$('#att').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{for(const f of e.target.files){const o={name:f.name,type:f.type};if(f.type.startsWith('image/')||f.type==='application/pdf'){o.kind=f.type==='application/pdf'?'pdf':'img';o.data=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)})}else{o.kind='text';o.data=(await f.text()).slice(0,60000)}pend.push(o)}e.target.value='';chips()};
+$('#web').onclick=()=>{if(!S.p.web&&!K.tavily){alert(t('nosearch'));openSettings();return}S.p.web=!S.p.web;$('#web').classList.toggle('on',S.p.web);save()};
 
-/* ---------- أدوات رياضية ---------- */
-const toR = Math.PI/180;
-function hav(a,b){
-  const dLat=(b[1]-a[1])*toR, dLng=(b[0]-a[0])*toR;
-  const s=Math.sin(dLat/2)**2+Math.cos(a[1]*toR)*Math.cos(b[1]*toR)*Math.sin(dLng/2)**2;
-  return 2*6371000*Math.asin(Math.sqrt(s));
-}
-function bearingBetween(a,b){
-  const y=Math.sin((b[0]-a[0])*toR)*Math.cos(b[1]*toR);
-  const x=Math.cos(a[1]*toR)*Math.sin(b[1]*toR)-Math.sin(a[1]*toR)*Math.cos(b[1]*toR)*Math.cos((b[0]-a[0])*toR);
-  return (Math.atan2(y,x)/toR+360)%360;
-}
-function projectOnRoute(p){
-  if(!R) return null;
-  const k=Math.cos(p[1]*toR), Rm=6371000;
-  const px=p[0]*toR*k*Rm, py=p[1]*toR*Rm;
-  let best={dist:Infinity,along:0};
-  const c=R.coords;
-  for(let i=0;i<c.length-1;i++){
-    const ax=c[i][0]*toR*k*Rm, ay=c[i][1]*toR*Rm;
-    const bx=c[i+1][0]*toR*k*Rm, by=c[i+1][1]*toR*Rm;
-    const dx=bx-ax, dy=by-ay, l2=dx*dx+dy*dy;
-    let t=l2?((px-ax)*dx+(py-ay)*dy)/l2:0;
-    t=Math.max(0,Math.min(1,t));
-    const d=Math.hypot(px-(ax+t*dx),py-(ay+t*dy));
-    if(d<best.dist) best={dist:d,along:R.cum[i]+t*(R.cum[i+1]-R.cum[i])};
-  }
-  return best;
-}
-function pointAtAlong(d){
-  const c=R.coords, cum=R.cum;
-  if(d<=0) return c[0];
-  if(d>=cum[cum.length-1]) return c[c.length-1];
-  let i=0; while(i<cum.length-2 && cum[i+1]<d) i++;
-  const seg=cum[i+1]-cum[i]||1, t=(d-cum[i])/seg;
-  return [c[i][0]+(c[i+1][0]-c[i][0])*t, c[i][1]+(c[i+1][1]-c[i][1])*t];
-}
-function fmtDist(m){
-  return m<1000 ? (Math.max(10,Math.round(m/10)*10))+' م' : (m/1000).toFixed(1)+' كم';
-}
-function sayDist(m){
-  if(m>=950) return 'كيلومتر واحد';
-  return (Math.max(50,Math.round(m/50)*50))+' متر';
-}
+/* sidebar */
+function renderList(){const q=$('#q').value.toLowerCase();$('#list').innerHTML=[...S.convs].filter(c=>!q||(c.title+' '+c.msgs.map(m=>m.text).join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.upd-a.upd).map(c=>`<div class="ci ${c.id===S.cur?'on':''}" data-id="${c.id}"><span class=ct>${esc(c.title||t('newt'))}</span><button data-r aria-label="${t('ren')}">✎</button><button data-d aria-label="Delete">✕</button></div>`).join('')}
+$('#list').onclick=e=>{const ci=e.target.closest('.ci');if(!ci)return;const c=S.convs.find(x=>x.id===ci.dataset.id);
+if(e.target.hasAttribute('data-r')){const n=prompt(t('ren'),c.title);if(n!=null){c.title=n.trim()||c.title;save();renderList()}return}
+if(e.target.hasAttribute('data-d')){if(confirm(t('del'))){S.convs=S.convs.filter(x=>x!==c);if(S.cur===c.id)S.cur=null;save();renderList();renderMsgs()}return}
+S.cur=c.id;save();setView('chat');renderList();renderMsgs();closeSide()};
+$('#q').oninput=renderList;
+$('#nc').onclick=()=>{newChat();setView('chat');closeSide();$('#in').focus()};
+const side=$('#side'),mob=()=>innerWidth<=820;
+function closeSide(){if(mob()){side.classList.add('hide');$('#ov').classList.remove('on')}}
+$('#tg').onclick=()=>{side.classList.toggle('hide');$('#ov').classList.toggle('on',mob()&&!side.classList.contains('hide'))};
+$('#ov').onclick=closeSide;
+function setView(v){$$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(v==='code')loadEd();closeSide()}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)setView(b.dataset.v)};
 
-/* ---------- الصوت ---------- */
-let arVoice = null;
-function pickVoice(){
-  if(!('speechSynthesis' in window)) return;
-  const v = speechSynthesis.getVoices();
-  arVoice = v.find(x=>/^ar/i.test(x.lang)) || null;
-}
-if('speechSynthesis' in window){
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-}
-function speak(text){
-  if(muted || !('speechSynthesis' in window)) return;
-  try{
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ar-SA';
-    if(arVoice) u.voice = arVoice;
-    u.rate = 1;
-    speechSynthesis.speak(u);
-  }catch(e){}
-}
-function toggleMute(){
-  muted = !muted;
-  $('muteBtn').textContent = muted ? '🔇' : '🔊';
-  if(muted && 'speechSynthesis' in window) speechSynthesis.cancel();
-}
+/* tools */
+function renderTools(){$('#tgrid').innerHTML=TL.map(x=>`<button class=card data-t="${x[0]}"><b>${S.p.lang==='ar'?x[2]:x[1]}</b></button>`).join('')}
+$('#tgrid').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const x=TL.find(y=>y[0]===b.dataset.t);newChat(x[0]);setView('chat');$('#in').value=x[4];$('#in').focus();grow()};
 
-/* ---------- الخريطة: تحميل + مباني 3D ---------- */
-map.on('load',()=>{
-  message('الخريطة جاهزة. ابحث عن وجهتك.');
-  add3DBuildings();
-  renderReports();
-  loadCamerasInView();
-});
-map.on('moveend',()=>{
-  clearTimeout(map._camT);
-  map._camT=setTimeout(loadCamerasInView,1200);
-});
+/* coding workspace */
+const FN={html:'index.html',css:'style.css',js:'script.js',py:'main.py'};
+function loadEd(){$('#ctabs').innerHTML=Object.keys(FN).map(k=>`<button class="btn ${k===tab?'on':''}" data-k="${k}">${FN[k]}</button>`).join('')+'<span style="color:var(--mu);font-size:12px">'+(tab==='py'?t('pyn'):'')+'</span>';$('#ed').value=S.p.code[tab];$('#cbar').innerHTML=[['run',t('run')],['copy',t('copy')],['dl',t('dl')],['clr',t('clr')],['exp',t('exp')],['dbg',t('dbg')]].map(x=>`<button class=btn data-a="${x[0]}">${x[1]}</button>`).join('');preview()}
+function preview(){const c=S.p.code;$('#pv').srcdoc=`<!doctype html><meta charset=utf-8><style>${c.css}</style>${c.html}<script>${c.js}<\/script>`}
+$('#ed').oninput=e=>{S.p.code[tab]=e.target.value;save()};
+$('#ctabs').onclick=e=>{const k=e.target.dataset.k;if(k){tab=k;loadEd()}};
+$('#cbar').onclick=e=>{const a=e.target.dataset.a;if(!a)return;const code=S.p.code[tab];
+if(a==='run')preview();
+if(a==='copy')navigator.clipboard.writeText(code);
+if(a==='dl'){const u=URL.createObjectURL(new Blob([code],{type:'text/plain'})),l=document.createElement('a');l.href=u;l.download=FN[tab];l.click();URL.revokeObjectURL(u)}
+if(a==='clr'){S.p.code[tab]='';save();loadEd()}
+if(a==='exp'||a==='dbg'){if(!code.trim())return;newChat('code');setView('chat');send((a==='exp'?'Explain this '+tab+' code step by step:':'Find and fix bugs in this '+tab+' code, and explain each fix:')+'\n```'+tab+'\n'+code+'\n```')}};
 
-function add3DBuildings(){
-  try{
-    const style = map.getStyle();
-    if(!style.sources || !style.sources.openmaptiles) return;
-    if(map.getLayer('darb-3d-buildings')) return;
-    let labelLayerId;
-    for(const layer of (style.layers||[])){
-      if(layer.type==='symbol' && layer.layout && layer.layout['text-field']){ labelLayerId=layer.id; break; }
-    }
-    map.addLayer({
-      id:'darb-3d-buildings',source:'openmaptiles','source-layer':'building',
-      type:'fill-extrusion',minzoom:14,
-      filter:['!=',['get','hide_3d'],'true'],
-      paint:{
-        'fill-extrusion-color':'#647ba5',
-        'fill-extrusion-height':['interpolate',['linear'],['zoom'],14,0,15,['coalesce',['get','render_height'],['get','height'],12]],
-        'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
-        'fill-extrusion-opacity':0.82
-      }
-    },labelLayerId);
-  }catch(e){ console.log('3D buildings unavailable:',e); }
-}
+/* images */
+$('#ig').onclick=async()=>{const o=$('#io'),p=S.p.prov.openai,pr=$('#ip').value.trim();if(!pr)return;if(!K.openai||!S.p.imgModel||!p.base){o.textContent=t('noimg');return}
+o.textContent='…';try{const r=await fetch(p.base.replace(/\/$/,'')+'/images/generations',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+K.openai},body:JSON.stringify({model:S.p.imgModel,prompt:pr,size:$('#isz').value,n:1})});await ok(r);const j=(await r.json()).data[0];const src=j.url||'data:image/png;base64,'+j.b64_json;o.innerHTML=`<img src="${escA(src)}" style="max-width:100%;border-radius:14px" alt="">`}catch(e){o.textContent=e.message}};
 
-function toggle3D(){
-  is3D=!is3D;
-  map.easeTo({pitch:is3D?55:0,bearing:is3D?-15:0,duration:800});
-  $('viewButton').textContent=is3D?'3D':'2D';
-}
-function tiltMap(){ is3D=true; map.easeTo({pitch:60,duration:800}); $('viewButton').textContent='3D'; }
-function resetMap(){ map.flyTo({center:[44.3661,33.3152],zoom:12,pitch:55,bearing:-15}); }
+/* settings */
+function openSettings(){const p=S.p;const sel=(k,opts)=>`<select data-p="${k}">${opts.map(o=>`<option value="${o[0]}" ${p[k]===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>`;
+$('#dlg').innerHTML=`<h2>${t('settings')}</h2><div class=note>${t('sec')}</div>
+${Object.keys(PV).map(id=>`<fieldset><legend>${PV[id].n}${ready(id)?' ✓':''}</legend><input type=password data-k="${id}" autocomplete=off placeholder="${K[id]?'•••••• (set this session)':'API key'}"><input data-m="${id}" placeholder="Model id, e.g. ${PV[id].ph}" value="${escA(p.prov[id].model)}">${p.prov[id].base!==undefined?`<input data-b="${id}" placeholder="Base URL" value="${escA(p.prov[id].base)}">`:''}</fieldset>`).join('')}
+<fieldset><legend>Tools</legend><input type=password data-k="tavily" autocomplete=off placeholder="Tavily API key (web search)"><input data-p="imgModel" placeholder="${t('imgm')} (uses OpenAI key/base URL)" value="${escA(p.imgModel)}"></fieldset>
+<label>${t('name')}</label><input data-p="name" value="${escA(p.name)}">
+<label>${t('theme')}</label>${sel('theme',[['dark','Dark'],['light','Light']])}
+<label>${t('lang')}</label>${sel('lang',[['en','English'],['ar','العربية']])}
+<label>${t('fmt')}</label>${sel('fmt',[['concise','Concise'],['balanced','Balanced'],['detailed','Detailed']])}
+<label>${t('instr')}</label><textarea rows=3 data-p="instr">${esc(p.instr)}</textarea>
+<label>${t('mem')}</label><textarea rows=3 data-p="mem">${esc(p.mem)}</textarea>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class=btn id="ex">${t('exportb')}</button><button class=btn id="wp">${t('wipe')}</button><span style="flex:1"></span><button class="btn pri" id="cl">${t('close')}</button></div>`;
+$('#modal').classList.add('on')}
+const dlg=$('#dlg');
+dlg.addEventListener('input',e=>{const el=e.target,d=el.dataset;if(d.k&&el.value)K[d.k]=el.value.trim();else if(d.m)S.p.prov[d.m].model=el.value.trim();else if(d.b)S.p.prov[d.b].base=el.value.trim();else if(d.p)S.p[d.p]=el.value;save();models()});
+dlg.addEventListener('change',e=>{if(e.target.dataset.p==='theme'||e.target.dataset.p==='lang'){prefs();openSettings()}});
+dlg.addEventListener('click',e=>{const i=e.target.id;if(i==='cl')closeSet();
+if(i==='ex'){const u=URL.createObjectURL(new Blob([JSON.stringify({conversations:S.convs,preferences:{...S.p}},null,2)],{type:'application/json'})),l=document.createElement('a');l.href=u;l.download='eclipse-export.json';l.click();URL.revokeObjectURL(u)}
+if(i==='wp'&&confirm(t('del'))){S.convs=[];S.cur=null;save();renderList();renderMsgs()}});
+function closeSet(){$('#modal').classList.remove('on');prefs();renderMsgs()}
+$('#modal').onclick=e=>{if(e.target.id==='modal')closeSet()};
+$('#setb').onclick=openSettings;
 
-/* ---------- علامة موقع المستخدم ---------- */
-function setUserMarker(lnglat,heading){
-  if(!userMarker){
-    const el=document.createElement('div'); el.className='me';
-    userMarker=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map'})
-      .setLngLat(lnglat).addTo(map);
-  }else userMarker.setLngLat(lnglat);
-  if(heading!=null && !isNaN(heading)) userMarker.setRotation(heading);
-}
-
-/* ---------- البحث (نتائج قريبة منك أولاً) ---------- */
-async function nominatim(q,extra){
-  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=10&accept-language=ar&countrycodes=iq&addressdetails=0&q='
-    +encodeURIComponent(q)+(extra||'');
-  const r=await fetch(url,{headers:{'Accept':'application/json'}});
-  if(!r.ok) throw new Error('search failed');
-  return r.json();
-}
-async function searchPlaces(){
-  const q=$('searchInput').value.trim();
-  if(!q){message('اكتب اسم المكان أولاً.');return;}
-  const box=$('results');
-  box.style.display='block';
-  box.innerHTML='<div class="result">جاري البحث...</div>';
-  message('');
-  const c = userPosition || [map.getCenter().lng,map.getCenter().lat];
-  const d=0.5;
-  const vb='&viewbox='+[c[0]-d,c[1]+d,c[0]+d,c[1]-d].join(',');
-  try{
-    let list=await nominatim(q,vb+'&bounded=1');
-    if(list.length<4){
-      const more=await nominatim(q,vb);
-      const seen=new Set(list.map(p=>p.place_id));
-      more.forEach(p=>{ if(!seen.has(p.place_id)) list.push(p); });
-    }
-    list.forEach(p=>p._d=hav(c,[Number(p.lon),Number(p.lat)]));
-    list.sort((a,b)=>a._d-b._d);
-    box.innerHTML='';
-    if(!list.length){
-      box.innerHTML='<div class="result">ما لقينا نتائج. جرّب اسم أو عنوان أوضح.</div>';
-      return;
-    }
-    list.slice(0,10).forEach(place=>{
-      const parts=place.display_name.split('،').length>1?place.display_name.split('،'):place.display_name.split(',');
-      const name=(place.name||parts[0]||'').trim();
-      const addr=parts.slice(1,4).join('،').trim();
-      const item=document.createElement('div'); item.className='result';
-      const rt=document.createElement('div'); rt.className='rt';
-      const rn=document.createElement('div'); rn.className='rn'; rn.textContent=name;
-      const ra=document.createElement('div'); ra.className='ra'; ra.textContent=addr;
-      rt.appendChild(rn); rt.appendChild(ra);
-      const rd=document.createElement('div'); rd.className='rd'; rd.textContent=fmtDist(place._d);
-      item.appendChild(rt); item.appendChild(rd);
-      item.onclick=()=>selectPlace(place,name);
-      box.appendChild(item);
-    });
-  }catch(e){
-    box.innerHTML='<div class="result">تعذر البحث. تأكد من الإنترنت وحاول مرة ثانية.</div>';
-  }
-}
-$('searchInput').addEventListener('keydown',e=>{ if(e.key==='Enter') searchPlaces(); });
-
-function clearRoute(){
-  routeReady=false; R=null;
-  if(map.getLayer('darb-route')) map.removeLayer('darb-route');
-  if(map.getLayer('darb-route-casing')) map.removeLayer('darb-route-casing');
-  if(map.getSource('darb-route')) map.removeSource('darb-route');
-  $('mainBtn').textContent='عرض المسار';
-}
-function selectPlace(place,name){
-  clearRoute();
-  destination=[Number(place.lon),Number(place.lat)];
-  $('destinationTitle').textContent=name||'الوجهة المحددة';
-  $('routeInfo').textContent=place.display_name;
-  $('results').style.display='none';
-  if(destinationMarker) destinationMarker.remove();
-  destinationMarker=new maplibregl.Marker({color:'#ff5964'})
-    .setLngLat(destination)
-    .setPopup(new maplibregl.Popup().setText(place.display_name))
-    .addTo(map);
-  map.flyTo({center:destination,zoom:15,pitch:55,duration:1000});
-  message('تم تحديد الوجهة. اضغط «عرض المسار».');
-}
-
-/* ---------- تحديد الموقع ---------- */
-function getPosition(){
-  return new Promise((res,rej)=>{
-    if(!navigator.geolocation) return rej(new Error('unsupported'));
-    navigator.geolocation.getCurrentPosition(
-      p=>res([p.coords.longitude,p.coords.latitude]),
-      e=>rej(e),
-      {enableHighAccuracy:true,timeout:15000}
-    );
-  });
-}
-async function locateUser(){
-  message('جاري تحديد موقعك...');
-  try{
-    userPosition=await getPosition();
-    setUserMarker(userPosition);
-    map.flyTo({center:userPosition,zoom:16,pitch:55});
-    message('تم تحديد موقعك.');
-  }catch(e){
-    message('تعذر تحديد الموقع. اسمح للمتصفح بالوصول للموقع (لازم الموقع يكون HTTPS).');
-  }
-}
-
-/* ---------- حساب المسار ---------- */
-async function buildRoute(opts){
-  opts=opts||{};
-  const origin=opts.origin||userPosition;
-  if(!origin||!destination) return false;
-  if(!opts.silent) message('جاري حساب المسار...');
-  try{
-    const coords=origin.join(',')+';'+destination.join(',');
-    const url='https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=geojson&steps=true';
-    const r=await fetch(url);
-    if(!r.ok) throw new Error('route failed');
-    const data=await r.json();
-    if(data.code!=='Ok'||!data.routes.length) throw new Error('no route');
-    const route=data.routes[0];
-    const c=route.geometry.coordinates;
-    const cum=[0];
-    for(let i=1;i<c.length;i++) cum.push(cum[i-1]+hav(c[i-1],c[i]));
-    const steps=route.legs[0].steps;
-    const stepAt=[0];
-    for(let i=1;i<steps.length;i++) stepAt.push(stepAt[i-1]+steps[i-1].distance);
-    R={
-      coords:c,cum,steps,stepAt,
-      distance:route.distance,duration:route.duration,
-      scale:route.distance/(cum[cum.length-1]||1)
-    };
-    ann={}; alerted=new Set(); offCount=0;
-
-    if(map.getLayer('darb-route')) map.removeLayer('darb-route');
-    if(map.getLayer('darb-route-casing')) map.removeLayer('darb-route-casing');
-    if(map.getSource('darb-route')) map.removeSource('darb-route');
-    map.addSource('darb-route',{type:'geojson',data:{type:'Feature',properties:{},geometry:route.geometry}});
-    map.addLayer({id:'darb-route-casing',type:'line',source:'darb-route',
-      layout:{'line-join':'round','line-cap':'round'},
-      paint:{'line-color':'#0b1f5c','line-width':10,'line-opacity':0.9}});
-    map.addLayer({id:'darb-route',type:'line',source:'darb-route',
-      layout:{'line-join':'round','line-cap':'round'},
-      paint:{'line-color':'#6587ff','line-width':6,'line-opacity':0.98}});
-
-    routeReady=true;
-    $('mainBtn').textContent='ابدأ القيادة';
-    $('routeInfo').textContent='المسافة '+(route.distance/1000).toFixed(1)+' كم · الوقت '+Math.max(1,Math.round(route.duration/60))+' دقيقة تقريباً';
-    if(!opts.silent){
-      message('تم رسم المسار. اضغط «ابدأ القيادة».');
-      const b=new maplibregl.LngLatBounds(origin,origin);
-      c.forEach(p=>b.extend(p));
-      map.fitBounds(b,{padding:{top:140,bottom:180,left:50,right:50},pitch:0,bearing:0,duration:1000});
-    }
-    // جلب كاميرات السرعة على طول المسار
-    const bb=bboxOf(c);
-    loadCameras(bb);
-    return true;
-  }catch(e){
-    if(!opts.silent) message('تعذر حساب المسار حالياً. تحقق من الإنترنت وحاول مرة ثانية.');
-    return false;
-  }
-}
-function bboxOf(c){
-  let w=180,s=90,e=-180,n=-90;
-  c.forEach(p=>{ if(p[0]<w)w=p[0]; if(p[0]>e)e=p[0]; if(p[1]<s)s=p[1]; if(p[1]>n)n=p[1]; });
-  return {w:w-0.005,s:s-0.005,e:e+0.005,n:n+0.005};
-}
-
-async function mainAction(){
-  if(!destination){message('ابحث عن وجهتك واختارها أولاً.');return;}
-  if(!routeReady){
-    if(!userPosition){
-      message('جاري تحديد موقعك...');
-      try{ userPosition=await getPosition(); setUserMarker(userPosition); }
-      catch(e){ message('تعذر تحديد الموقع. اسمح للمتصفح بالوصول للموقع، أو جرّب «تجربة المسار».'); return; }
-    }
-    await buildRoute();
-  }else{
-    startNavigation(false);
-  }
-}
-async function simulateAction(){
-  if(!destination){message('ابحث عن وجهتك واختارها أولاً.');return;}
-  if(!userPosition){
-    userPosition=[map.getCenter().lng,map.getCenter().lat];
-    setUserMarker(userPosition);
-  }
-  if(!routeReady){ const ok=await buildRoute({silent:true}); if(!ok){message('تعذر حساب المسار.');return;} }
-  startNavigation(true);
-}
-
-/* ---------- بدء/إنهاء الملاحة ---------- */
-async function startNavigation(sim){
-  if(!R) return;
-  navigating=true;
-  document.body.classList.add('navigating');
-  $('results').style.display='none';
-  ann={}; alerted=new Set(); offCount=0; lastFix=null; curLimit=null;
-  setLimit(null);
-  try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
-  speak('بدأت الملاحة. الطريق '+Math.max(1,Math.round(R.duration/60))+' دقيقة تقريباً');
-  if('speechSynthesis' in window){
-    setTimeout(()=>{ if(!arVoice) pickVoice(); if(!arVoice) toast('ما لقيت صوت عربي بجهازك. ثبّت صوت عربي من إعدادات «تحويل النص إلى كلام».'); },1500);
-  }
-  map.easeTo({center:userPosition,zoom:17,pitch:60,duration:900});
-  if(sim) startSimulation(); else startWatch();
-}
-function stopNavigation(speakIt){
-  navigating=false;
-  document.body.classList.remove('navigating');
-  if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
-  if(simTimer){ clearInterval(simTimer); simTimer=null; }
-  try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){}
-  hideAlert();
-  if(speakIt) speak('تم إنهاء الملاحة');
-  map.easeTo({pitch:55,bearing:-15,zoom:14,duration:800});
-  routeReady=true; $('mainBtn').textContent='ابدأ القيادة';
-}
-function startWatch(){
-  if(!navigator.geolocation){ message('متصفحك لا يدعم تحديد الموقع.'); return; }
-  watchId=navigator.geolocation.watchPosition(p=>{
-    onPosition({
-      lng:p.coords.longitude,lat:p.coords.latitude,
-      speed:p.coords.speed,heading:p.coords.heading
-    });
-  },()=>{ toast('إشارة GPS ضعيفة...'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
-}
-function startSimulation(){
-  let d=0;
-  const total=R.cum[R.cum.length-1];
-  const mps=50/3.6;
-  simTimer=setInterval(()=>{
-    d+=mps*1.2;
-    if(d>=total){ clearInterval(simTimer); simTimer=null; }
-    const p=pointAtAlong(d), p2=pointAtAlong(d+15);
-    onPosition({lng:p[0],lat:p[1],speed:mps,heading:bearingBetween(p,p2)});
-  },1000);
-}
-
-/* ---------- نص التعليمات بالعربي ---------- */
-const ORD=['','الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن'];
-function maneuverInfo(step){
-  const m=step.maneuver||{}, t=m.type, mod=m.modifier||'';
-  const name=step.name?(' إلى '+step.name):'';
-  const dirAr={'left':'اليسار','right':'اليمين','slight left':'اليسار','slight right':'اليمين','sharp left':'اليسار','sharp right':'اليمين'};
-  if(t==='arrive') return {arrow:'🏁',text:'وصلت إلى وجهتك'+(mod==='left'?' (على يسارك)':mod==='right'?' (على يمينك)':'')};
-  if(t==='depart') return {arrow:'⬆',text:'ابدأ التحرك'+name};
-  if(t==='roundabout'||t==='rotary'||t==='roundabout turn'){
-    const ex=m.exit?(' وخذ المخرج '+(ORD[m.exit]||m.exit)):'';
-    return {arrow:'⟳',text:'ادخل الدوار'+ex+name};
-  }
-  if(t==='fork'){
-    return {arrow:mod.includes('left')?'↖':'↗',text:'عند التفرّع ابقَ على '+(dirAr[mod]||'الطريق الرئيسي')};
-  }
-  if(t==='merge') return {arrow:'⬆',text:'اندمج مع الطريق'+name};
-  switch(mod){
-    case 'left':return {arrow:'⬅',text:'انعطف يسار'+name};
-    case 'right':return {arrow:'➡',text:'انعطف يمين'+name};
-    case 'slight left':return {arrow:'↖',text:'انعطف قليلاً إلى اليسار'+name};
-    case 'slight right':return {arrow:'↗',text:'انعطف قليلاً إلى اليمين'+name};
-    case 'sharp left':return {arrow:'↰',text:'انعطف بشدة إلى اليسار'+name};
-    case 'sharp right':return {arrow:'↱',text:'انعطف بشدة إلى اليمين'+name};
-    case 'uturn':return {arrow:'↩',text:'استدر للعودة'};
-    default:return {arrow:'⬆',text:'استمر للأمام'+name};
-  }
-}
-
-/* ---------- المعالجة الأساسية لكل تحديث موقع ---------- */
-function onPosition(p){
-  const pos=[p.lng,p.lat];
-  userPosition=pos;
-
-  // السرعة
-  let sp=p.speed;
-  const now=Date.now();
-  if((sp==null||isNaN(sp)) && lastFix){
-    const dt=(now-lastFix.t)/1000;
-    if(dt>0) sp=hav(lastFix.pos,pos)/dt;
-  }
-  // الاتجاه
-  let hd=p.heading;
-  if((hd==null||isNaN(hd)) && lastFix && hav(lastFix.pos,pos)>3) hd=bearingBetween(lastFix.pos,pos);
-  if(hd==null||isNaN(hd)) hd=lastFix?lastFix.hd:0;
-  lastFix={pos,t:now,hd};
-  const kmh=Math.max(0,Math.round((sp||0)*3.6));
-
-  setUserMarker(pos,hd);
-  if(!navigating||!R) return;
-
-  $('speedVal').textContent=kmh;
-  const over=curLimit&&kmh>curLimit+5;
-  $('speedBox').classList.toggle('over',!!over);
-  if(over && now-lastOverWarn>30000){ lastOverWarn=now; speak('انتبه، تجاوزت السرعة المحددة'); }
-
-  map.easeTo({center:pos,bearing:hd,pitch:60,zoom:17,offset:[0,160],duration:900,essential:true});
-
-  const pr=projectOnRoute(pos);
-  const along=pr.along*R.scale;
-  const remaining=Math.max(0,R.distance-along);
-  const remTime=R.duration*(remaining/R.distance);
-
-  // خارج المسار؟
-  if(pr.dist>60){ offCount++; } else offCount=0;
-  if(offCount>=3 && !rerouting && now-lastReroute>15000){ doReroute(pos); return; }
-
-  // وصلنا؟
-  if(remaining<35){
-    speak('وصلت إلى وجهتك');
-    toast('وصلت إلى وجهتك 🏁');
-    stopNavigation(false);
-    return;
-  }
-
-  // الانعطافة الجاية
-  let k=1;
-  while(k<R.steps.length-1 && R.stepAt[k]<along-15) k++;
-  const step=R.steps[k];
-  const dist=Math.max(0,R.stepAt[k]-along);
-  const info=maneuverInfo(step);
-  $('navArrow').textContent=info.arrow;
-  $('navDist').textContent=fmtDist(dist);
-  $('navText').textContent=info.text;
-  voiceGuide(k,dist,info.text);
-
-  // الوقت والمسافة المتبقية
-  $('etaMin').textContent=Math.max(1,Math.round(remTime/60));
-  $('etaKm').textContent=(remaining/1000).toFixed(1);
-  $('etaClock').textContent=new Date(now+remTime*1000).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'});
-
-  checkHazards(pos,along);
-  maybeFetchLimit(pos,now);
-}
-
-function voiceGuide(k,dist,text){
-  const a=ann[k]||(ann[k]={});
-  const isArrive=R.steps[k].maneuver.type==='arrive';
-  if(dist<=80){
-    if(!a.n){ a.n=a.m=a.f=true; speak(isArrive?text:text+' الآن'); }
-  }else if(dist<=400){
-    if(!a.m){ a.m=a.f=true; speak('بعد '+sayDist(dist)+' '+text); }
-  }else if(dist<=1000){
-    if(!a.f){ a.f=true; speak('بعد '+sayDist(dist)+' '+text); }
-  }
-}
-
-async function doReroute(pos){
-  rerouting=true; lastReroute=Date.now();
-  speak('جاري إعادة حساب المسار');
-  toast('جاري إعادة حساب المسار...');
-  const ok=await buildRoute({silent:true,origin:pos});
-  rerouting=false; offCount=0;
-  if(!ok) toast('تعذر إعادة حساب المسار.');
-}
-
-/* ---------- حد السرعة (من OpenStreetMap) ---------- */
-function setLimit(v){
-  curLimit=v;
-  const el=$('limitBox');
-  if(v){ el.textContent=v; el.classList.remove('none'); }
-  else{ el.textContent='--'; el.classList.add('none'); }
-}
-async function overpass(q){
-  const r=await fetch('https://overpass-api.de/api/interpreter',{
-    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:'data='+encodeURIComponent(q)
-  });
-  if(!r.ok) throw new Error('overpass');
-  return r.json();
-}
-async function maybeFetchLimit(pos,now){
-  if(now-lastLimitFetch<10000) return;
-  lastLimitFetch=now;
-  try{
-    const j=await overpass('[out:json][timeout:8];way(around:25,'+pos[1]+','+pos[0]+')["highway"]["maxspeed"];out tags 3;');
-    let v=null;
-    for(const w of (j.elements||[])){
-      const m=String(w.tags.maxspeed||'').match(/(\d+)/);
-      if(m){ v=parseInt(m[1],10); if(/mph/i.test(w.tags.maxspeed)) v=Math.round(v*1.609); break; }
-    }
-    setLimit(v);
-  }catch(e){}
-}
-
-/* ---------- البلاغات (سيطرة، ازدحام، حفرة، مطب، حادث، كاميرا) ---------- */
-const DAY=864e5, HR=36e5;
-const TYPES={
-  checkpoint:{icon:'🚧',label:'سيطرة',ttl:6*HR},
-  traffic:{icon:'🚗',label:'ازدحام',ttl:2*HR},
-  accident:{icon:'💥',label:'حادث',ttl:4*HR},
-  pothole:{icon:'🕳️',label:'حفرة',ttl:30*DAY},
-  bump:{icon:'⚠️',label:'مطب',ttl:30*DAY},
-  camera:{icon:'📷',label:'كاميرا مراقبة',ttl:90*DAY}
-};
-const KEY='darb_reports_v1', VKEY='darb_votes_v1';
-let reports=[];
-let reportMarkers={};
-
-function loadReports(){ try{ reports=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ reports=[]; } }
-function saveReports(){ try{ localStorage.setItem(KEY,JSON.stringify(reports)); }catch(e){} }
-function loadVotes(){ try{ return JSON.parse(localStorage.getItem(VKEY)||'{}'); }catch(e){ return {}; } }
-function saveVotes(v){ try{ localStorage.setItem(VKEY,JSON.stringify(v)); }catch(e){} }
-function activeReports(){
-  const now=Date.now();
-  return reports.filter(r=>TYPES[r.type] && now-r.t<TYPES[r.type].ttl);
-}
-loadReports();
-
-(function buildGrid(){
-  const g=$('reportGrid');
-  Object.keys(TYPES).forEach(k=>{
-    const b=document.createElement('button');
-    b.innerHTML='<span>'+TYPES[k].icon+'</span>'+TYPES[k].label;
-    b.onclick=()=>addReport(k);
-    g.appendChild(b);
-  });
-})();
-function openReport(){ $('reportSheet').classList.add('show'); }
-function closeReport(){ $('reportSheet').classList.remove('show'); }
-
-function addReport(type){
-  closeReport();
-  const pos=userPosition||[map.getCenter().lng,map.getCenter().lat];
-  const r={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    type,lat:pos[1],lng:pos[0],t:Date.now(),up:1,down:0};
-  reports.push(r);
-  const v=loadVotes(); v[r.id]=1; saveVotes(v);
-  saveReports(); renderReports();
-  toast('تم التبليغ عن '+TYPES[type].label+'. شكراً 🙏');
-  speak('تم التبليغ عن '+TYPES[type].label+'. شكراً');
-}
-function voteReport(r,up){
-  const v=loadVotes();
-  if(v[r.id]){ toast('صوّتت على هذا البلاغ من قبل.'); return; }
-  v[r.id]=1; saveVotes(v);
-  if(up){ r.up++; r.t=Date.now(); } else r.down++;
-  if(r.down>=2 && r.down>r.up){
-    reports=reports.filter(x=>x.id!==r.id);
-    toast('تم حذف البلاغ لأن أشخاص أكدوا إنه غير موجود.');
-  }else toast(up?'شكراً، تم تأكيد البلاغ ✔':'شكراً، تم تسجيل إنه غير موجود');
-  saveReports(); renderReports();
-}
-function renderReports(){
-  Object.values(reportMarkers).forEach(m=>m.remove());
-  reportMarkers={};
-  reports=activeReports(); saveReports();
-  reports.forEach(r=>{
-    const el=document.createElement('div'); el.className='hz'; el.textContent=TYPES[r.type].icon;
-    const mk=new maplibregl.Marker({element:el}).setLngLat([r.lng,r.lat])
-      .setPopup(new maplibregl.Popup({offset:16}).setDOMContent(popupFor(r))).addTo(map);
-    reportMarkers[r.id]=mk;
-  });
-}
-function ago(t){
-  const m=Math.round((Date.now()-t)/60000);
-  if(m<1) return 'قبل لحظات';
-  if(m<60) return 'قبل '+m+' دقيقة';
-  const h=Math.round(m/60);
-  if(h<48) return 'قبل '+h+' ساعة';
-  return 'قبل '+Math.round(h/24)+' يوم';
-}
-function popupFor(r){
-  const d=document.createElement('div'); d.className='pop';
-  d.innerHTML='<b>'+TYPES[r.type].icon+' '+TYPES[r.type].label+'</b><div class="pm">آخر تأكيد '+ago(r.t)+' · ✔ '+r.up+' · ✖ '+r.down+'</div>';
-  const row=document.createElement('div'); row.className='pb';
-  const y=document.createElement('button'); y.textContent='موجود ✔'; y.onclick=()=>voteReport(r,true);
-  const n=document.createElement('button'); n.textContent='مو موجود ✖'; n.className='danger'; n.onclick=()=>voteReport(r,false);
-  row.appendChild(y); row.appendChild(n); d.appendChild(row);
-  return d;
-}
-
-/* ---------- كاميرات السرعة من OpenStreetMap ---------- */
-let osmCams=new Map();
-let camMarkers={};
-async function loadCameras(bb){
-  try{
-    if(bb.e-bb.w>1.5||bb.n-bb.s>1.5) return;
-    const j=await overpass('[out:json][timeout:15];node["highway"="speed_camera"]('+bb.s+','+bb.w+','+bb.n+','+bb.e+');out;');
-    (j.elements||[]).forEach(n=>{
-      const id='o'+n.id;
-      if(osmCams.has(id)) return;
-      osmCams.set(id,{id,lat:n.lat,lng:n.lon});
-      const el=document.createElement('div'); el.className='hz'; el.textContent='📷';
-      const pop=document.createElement('div'); pop.className='pop';
-      pop.innerHTML='<b>📷 كاميرا سرعة</b><div class="pm">من بيانات OpenStreetMap</div>';
-      camMarkers[id]=new maplibregl.Marker({element:el}).setLngLat([n.lon,n.lat])
-        .setPopup(new maplibregl.Popup({offset:16}).setDOMContent(pop)).addTo(map);
-    });
-  }catch(e){}
-}
-function loadCamerasInView(){
-  if(map.getZoom()<11) return;
-  const b=map.getBounds();
-  loadCameras({w:b.getWest(),s:b.getSouth(),e:b.getEast(),n:b.getNorth()});
-}
-
-/* ---------- تنبيه الأخطار قدّامك أثناء القيادة ---------- */
-function checkHazards(pos,along){
-  const list=[];
-  activeReports().forEach(r=>list.push({id:r.id,lat:r.lat,lng:r.lng,label:TYPES[r.type].label,icon:TYPES[r.type].icon,rep:r}));
-  osmCams.forEach(c=>list.push({id:c.id,lat:c.lat,lng:c.lng,label:'كاميرا سرعة',icon:'📷',rep:null}));
-  for(const h of list){
-    if(alerted.has(h.id)) continue;
-    const hp=[h.lng,h.lat];
-    if(hav(pos,hp)>600) continue;
-    const pr=projectOnRoute(hp);
-    if(!pr||pr.dist>45) continue;
-    const ahead=pr.along*R.scale-along;
-    if(ahead>0&&ahead<400){
-      alerted.add(h.id);
-      showAlert(h,ahead);
-      break;
-    }
-  }
-}
-function showAlert(h,ahead){
-  currentAlertReport=h.rep;
-  $('alertIcon').textContent=h.icon;
-  $('alertText').textContent=h.label+' بعد '+fmtDist(ahead);
-  $('alertYes').style.display=h.rep?'':'none';
-  $('alertNo').style.display=h.rep?'':'none';
-  $('alertBox').classList.add('show');
-  speak('انتبه، '+h.label+' بعد '+sayDist(ahead));
-  clearTimeout(alertTimer);
-  alertTimer=setTimeout(hideAlert,12000);
-}
-function hideAlert(){ $('alertBox').classList.remove('show'); currentAlertReport=null; clearTimeout(alertTimer); }
-$('alertYes').onclick=()=>{ if(currentAlertReport) voteReport(currentAlertReport,true); hideAlert(); };
-$('alertNo').onclick=()=>{ if(currentAlertReport) voteReport(currentAlertReport,false); hideAlert(); };
-
-/* ---------- إشعار قصير ---------- */
-let toastEl=null,toastT=null;
-function toast(t){
-  if(!navigating){ message(t); return; }
-  if(!toastEl){
-    toastEl=document.createElement('div');
-    toastEl.className='panel';
-    toastEl.style.cssText='left:50%;transform:translateX(-50%);top:92px;padding:10px 16px;font-size:14px;z-index:10;max-width:90%;text-align:center';
-    document.body.appendChild(toastEl);
-  }
-  toastEl.textContent=t; toastEl.style.display='block';
-  clearTimeout(toastT); toastT=setTimeout(()=>toastEl.style.display='none',4000);
-}
-</script>
-</body>
-</html>
+/* prefs, models, input */
+function models(){const r=Object.keys(PV).filter(ready),m=$('#model');m.innerHTML=r.length?r.map(id=>`<option value="${id}" ${id===curProv()?'selected':''}>${PV[id].n} · ${esc(S.p.prov[id].model)}</option>`).join(''):`<option>${t('nop')}</option>`}
+$('#model').onchange=e=>{if(ready(e.target.value)){S.p.sel=e.target.value;save()}};
+function prefs(){const p=S.p,h=document.documentElement;h.dataset.theme=p.theme;h.lang=p.lang;h.dir=p.lang==='ar'?'rtl':'ltr';
+$('#nc').textContent='＋ '+t('new');$('#q').placeholder=t('search');$('#in').placeholder=t('ph');$('#ip').placeholder=t('iph');$('#ig').textContent=t('gen');
+$('#nav').innerHTML=[['chat',t('chat')],['tools',t('tools')],['code',t('code')],['img',t('images')]].map(x=>`<button data-v="${x[0]}">${x[1]}</button>`).join('');
+$$('#nav button').forEach(b=>b.classList.toggle('on',$('#v-'+b.dataset.v).classList.contains('on')));
+$('#uname').textContent=p.name||'User';$('#avt').textContent=(p.name||'U')[0].toUpperCase();$('#web').classList.toggle('on',p.web);
+renderTools();renderList();models();save()}
+function grow(){const i=$('#in');i.style.height='auto';i.style.height=Math.min(i.scrollHeight,200)+'px'}
+$('#in').oninput=grow;
+$('#in').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}};
+$('#go').onclick=()=>busyF?ac&&ac.abort():send();
+document.addEventListener('keydown',e=>{const m=e.ctrlKey||e.metaKey;if(m&&e.key==='k'){e.preventDefault();$('#nc').click()}if(m&&e.key==='b'){e.preventDefault();$('#tg').click()}if(m&&e.key===','){e.preventDefault();openSettings()}if(e.key==='Escape'){if($('#modal').classList.contains('on'))closeSet();else if(busyF&&ac)ac.abort()}});
+$('#logo1').innerHTML=LOGO;if(mob())side.classList.add('hide');
+if(!cur())S.cur=null;prefs();renderMsgs();
+</script></body></html>
